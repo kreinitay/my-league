@@ -596,6 +596,13 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .pr-g .tb, .pr-g .tb *{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
 .pr-g > span{text-align:center}
 .pr-g input{width:100%}
+.tsel{display:inline-flex;align-items:center;gap:3px;direction:ltr}
+.tsel select{width:auto;min-width:62px;padding-inline:6px;text-align:center}
+.dt-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.dt-row input[type=date]{flex:1;min-width:140px}
+.tr-row{grid-template-columns:1fr 1fr!important}
+.tr-row select[name=d]{grid-column:1/-1}
+@media(min-width:700px){.tr-row{grid-template-columns:110px auto auto 1fr 1fr 40px!important}.tr-row select[name=d]{grid-column:auto}}
 
 </style>
 </head>
@@ -992,6 +999,33 @@ function gameHighs(k, limit = 5, ids = null) {
 }
 
 /* ================= רכיבי תצוגה ================= */
+// בחירת שעה בשעון 24 שעות (בלי AM/PM, לא משנה מה שפת המחשב). השעה נשמרת בשדה נסתר כ-"18:30"
+function timeSel(attrs, v = "") {
+  const ok = /^\d\d:\d\d$/.test(v || ""), [h, m] = ok ? v.split(":") : ["", ""];
+  const hs = Array.from({ length:24 }, (_, i) => String(i).padStart(2, "0")), ms = Array.from({ length:12 }, (_, i) => String(i * 5).padStart(2, "0"));
+  if (m && !ms.includes(m)) { ms.push(m); ms.sort(); }
+  const opt = (x, cur) => `<option value="${x}" ${x === cur ? "selected" : ""}>${x}</option>`;
+  return `<span class="tsel"><select class="inp" data-tpart="h" aria-label="שעה"><option value="">--</option>${hs.map(x => opt(x, h)).join("")}</select><b>:</b><select class="inp" data-tpart="m" aria-label="דקות"><option value="">--</option>${ms.map(x => opt(x, m)).join("")}</select><input type="hidden" ${attrs} value="${ok ? esc(v) : ""}"></span>`;
+}
+document.addEventListener("change", (e) => {
+  const el = e.target; if (!el.dataset?.tpart) return;
+  const w = el.closest(".tsel"), hS = w.querySelector("[data-tpart=h]"), mS = w.querySelector("[data-tpart=m]"), hid = w.querySelector("input[type=hidden]");
+  if (hS.value && !mS.value) mS.value = "00";
+  hid.value = hS.value ? `${hS.value}:${mS.value || "00"}` : "";
+  if (hid.dataset.gf) gameField(hid, true);
+  // לוח אימונים: שעת התחלה ממלאת לבד שעת סיום – שעה וחצי (חוץ משישי), אם עוד לא נבחרה
+  const row = w.closest(".tr-row");
+  if (hid.name === "to") delete hid.dataset.auto;                       // נבחר ידנית – לא לדרוס
+  if (row && hid.name === "from" && hid.value) {
+    const toW = row.querySelectorAll(".tsel")[1], toH = toW.querySelector("input[type=hidden]");
+    if ((!toH.value || toH.dataset.auto) && row.querySelector("[name=d]").value !== "5") {
+      toH.dataset.auto = "1";
+      const [h, m] = hid.value.split(":").map(Number), t = h * 60 + m + 90, v = `${String(Math.floor(t / 60) % 24).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+      toH.value = v; toW.querySelector("[data-tpart=h]").value = v.slice(0, 2);
+      const mSel = toW.querySelector("[data-tpart=m]"); if (![...mSel.options].some(o => o.value === v.slice(3))) mSel.add(new Option(v.slice(3), v.slice(3))); mSel.value = v.slice(3);
+    }
+  }
+});
 function initials(t) { return esc((t.short || tn(t) || "?").slice(0, 3)); }
 /* לוגו: מקטינים כל תמונה ל-192 פיקסלים ושומרים אותה בתוך הנתונים */
 const okImg = (v) => typeof v === "string" && v.length < 400000 && /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v);
@@ -2297,7 +2331,7 @@ function adminGameEditor(id) {
       <label class="f">סטטוס<select class="inp" data-gf="status" id="gStatus">${[["scheduled","טרם שוחק"],["live","משוחק עכשיו"],["final","סופי"]].map(([k, l]) => `<option value="${k}" ${g.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       <label class="f">מחזור<input class="inp" data-gf="round" value="${esc(g.round ?? "")}"></label>
       <label class="f">תאריך<input class="inp" type="date" data-gf="date" value="${esc(g.date || "")}"></label>
-      <label class="f">שעה<input class="inp" type="time" data-gf="time" value="${esc(g.time || "")}"></label>
+      <label class="f">שעה${timeSel('data-gf="time"', g.time || "")}</label>
       <label class="f">אולם<input class="inp" data-gf="venue" value="${esc(g.venue || "")}"></label>
     </div>
     <label class="f" style="margin-top:12px">הערות<textarea class="inp" rows="2" data-gf="notes">${esc(g.notes || "")}</textarea></label>
@@ -2609,7 +2643,7 @@ const ACT = {
     const shot = { id: uid(), pid: tapSel, x: pendingShot.x, y: pendingShot.y, made, three }; if (sq) shot.q = sq;
     (g.shots ||= []).push(shot); pendingShot = null;
     const p = player(tapSel);
-    tapLog.push({ gid: g.id, pid: tapSel, before, shotId: shot.id, txt: `#${p.number ?? ""} ${p.name} – ${three ? 3 : 2} נק' ${made ? "✓" : "✗"} (מהמפה)`, time: new Date().toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit" }) });
+    tapLog.push({ gid: g.id, pid: tapSel, before, shotId: shot.id, txt: `#${p.number ?? ""} ${p.name} – ${three ? 3 : 2} נק' ${made ? "✓" : "✗"} (מהמפה)`, time: new Date().toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit", hourCycle:"h23" }) });
     if (navigator.vibrate) navigator.vibrate(15);
     commit(false); rerenderBox();
   },
@@ -2655,7 +2689,7 @@ const ACT = {
     const a = TAP.find(x => x.id === el.dataset.a); const before = g.box[tapSel] ? JSON.parse(JSON.stringify(g.box[tapSel])) : null;
     applyTap(g, tapSel, a.f);
     const p = player(tapSel);
-    tapLog.push({ gid: g.id, pid: tapSel, before, txt: `#${p.number ?? ""} ${p.name} – ${a.l}`, time: new Date().toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit" }) });
+    tapLog.push({ gid: g.id, pid: tapSel, before, txt: `#${p.number ?? ""} ${p.name} – ${a.l}`, time: new Date().toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit", hourCycle:"h23" }) });
     if (navigator.vibrate) navigator.vibrate(15);
     commit(false); rerenderBox();
   },
@@ -2988,7 +3022,7 @@ const CHAT_ERR = { "wrong-code":"הקוד לא נכון", closed:"הצ'אט סג
 
 /* ---- תצוגה ---- */
 function chatTime(ts) {
-  const d = new Date(ts), now = new Date(); const t = d.toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit" });
+  const d = new Date(ts), now = new Date(); const t = d.toLocaleTimeString("he-IL", { hour:"2-digit", minute:"2-digit", hourCycle:"h23" });
   return d.toDateString() === now.toDateString() ? t : d.toLocaleDateString("he-IL", { day:"numeric", month:"numeric" }) + " " + t;
 }
 function whoJn(m) { const p = m.pid && player(m.pid), t = p && team(p.teamId); return p ? `<a class="cm-jn" href="#/player/${p.id}" style="background:${esc(t?.color || "var(--card2)")}" title="${esc(p.name)}${t ? " · " + esc(tn(t)) : ""}">${esc(p.number || "•")}</a>` : ""; }
@@ -3266,7 +3300,7 @@ async function pollsLoad() {
   if (chatKicked(res)) return;
   if (res.ok) { POLLS.list = res.polls || []; POLLS.loaded = true; const el = $("#pollsList"); if (el) el.innerHTML = pollsListHtml(); }
 }
-const dtShort = (ts) => new Date(ts).toLocaleString("he-IL", { weekday:"short", day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit" });
+const dtShort = (ts) => new Date(ts).toLocaleString("he-IL", { weekday:"short", day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit", hourCycle:"h23" });
 function pollCard(p) {
   const now = Date.now(), sched = now < p.start, closed = p.end && now >= p.end, canVote = p.open;
   const showRes = p.mine !== null || closed || ADMIN_PW;
@@ -3285,8 +3319,8 @@ function pagePolls() {
   return `${ADMIN_PW ? `<details class="card pad sec poll-new"><summary><b>➕ סקר חדש</b></summary>
     <form data-form="pollNew" style="margin-top:10px"><label class="f">השאלה<input class="inp" name="q" maxlength="160" required placeholder="למשל: מי יהיה שחקן העונה?"></label>
     <div class="fgrid" style="margin-top:8px">${[0,1,2,3,4,5].map(optIn).join("")}</div>
-    <div class="fgrid" style="margin-top:8px"><label class="f">נפתח<input class="inp" type="datetime-local" name="start"><small class="muted">ריק = עכשיו</small></label>
-    <label class="f">נסגר<input class="inp" type="datetime-local" name="end"><small class="muted">ריק = לא נסגר לבד</small></label></div>
+    <div class="fgrid" style="margin-top:8px"><label class="f">נפתח<span class="dt-row"><input class="inp" type="date" name="start_d">${timeSel('name="start_t"')}</span><small class="muted">ריק = עכשיו</small></label>
+    <label class="f">נסגר<span class="dt-row"><input class="inp" type="date" name="end_d">${timeSel('name="end_t"')}</span><small class="muted">ריק = לא נסגר לבד</small></label></div>
     <button class="btn pri" style="margin-top:10px">פרסם סקר</button></form></details>` : ""}
   <div id="pollsList" class="polls">${pollsListHtml()}</div>`;
 }
@@ -3325,17 +3359,20 @@ function pagePredict() {
 
 /* ================= לוח אימונים (רק עם קוד הצ'אט) ================= */
 const DAYS = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
-const TRAIN = { slots:[], note:"", loaded:false, busy:false, edit:false };
+const TRAIN = { slots:[], note:"", noteUntil:0, loaded:false, busy:false, edit:false };
+// סוף השבוע (מוצאי שבת) – ההודעה השבועית נעלמת לבד אחרי זה, הלוח עצמו חוזר כל שבוע
+const weekEnd = () => { const d = new Date(); d.setDate(d.getDate() + (6 - d.getDay())); d.setHours(23, 59, 59, 0); return d.getTime(); };
+const trainNote = () => TRAIN.note && (!TRAIN.noteUntil || Date.now() < TRAIN.noteUntil) ? TRAIN.note : "";
 async function trainLoad() {
   if (TRAIN.busy) return; TRAIN.busy = true;
   const res = await chatApi("GET", "/training", { room:"main" });
   TRAIN.busy = false;
   if (chatKicked(res)) return;
-  if (res.ok) { Object.assign(TRAIN, { slots:res.slots || [], note:res.note || "", updated:res.updated, loaded:true }); if (/^#\/training/.test(ROUTE)) render(true); }
+  if (res.ok) { Object.assign(TRAIN, { slots:res.slots || [], note:res.note || "", noteUntil:res.noteUntil || 0, updated:res.updated, loaded:true }); if (/^#\/training/.test(ROUTE)) render(true); }
 }
 function trainRow(x = {}) {
   return `<div class="tr-row"><select class="inp" name="d">${DAYS.map((d, i) => `<option value="${i}" ${x.d === i ? "selected" : ""}>${d}</option>`).join("")}</select>
-    <input class="inp" type="time" name="from" value="${esc(x.from || "")}"><input class="inp" type="time" name="to" value="${esc(x.to || "")}">
+    <label class="f">מ-${timeSel('name="from"', x.from || "")}</label><label class="f">עד${timeSel('name="to"', x.to || "")}</label>
     <input class="inp" name="place" maxlength="60" placeholder="איפה" value="${esc(x.place || "")}"><input class="inp" name="note" maxlength="60" placeholder="הערה" value="${esc(x.note || "")}">
     <button type="button" class="btn sm danger" data-act="trainRm" aria-label="מחק">✕</button></div>`;
 }
@@ -3343,14 +3380,14 @@ function pageTraining() {
   const gate = chatGate("לוח האימונים"); if (gate) return gate;
   if (!TRAIN.loaded) { setTimeout(trainLoad); return `<div class="card pad cm-empty">טוען…</div>`; }
   const today = new Date().getDay();
-  const week = DAYS.map((d, i) => { const xs = TRAIN.slots.filter(x => x.d === i); return xs.length ? `<div class="tr-day${i === today ? " today" : ""}"><b>${d}${i === today ? " · היום" : ""}</b>${xs.map(x => `<div class="tr-slot"><span class="num">${esc(x.from)}${x.to ? "–" + esc(x.to) : ""}</span>${x.place ? `<span>${esc(x.place)}</span>` : ""}${x.note ? `<small class="muted">${esc(x.note)}</small>` : ""}</div>`).join("")}</div>` : ""; }).join("");
+  const week = DAYS.map((d, i) => { const xs = TRAIN.slots.filter(x => x.d === i); return xs.length ? `<div class="tr-day${i === today ? " today" : ""}"><b>${d}${i === today ? " · היום" : ""}</b>${xs.map(x => `<div class="tr-slot"><span class="num" dir="ltr">${esc(x.from)}${x.to ? "–" + esc(x.to) : ""}</span>${x.place ? `<span>${esc(x.place)}</span>` : ""}${x.note ? `<small class="muted">${esc(x.note)}</small>` : ""}</div>`).join("")}</div>` : ""; }).join("");
   return `<section class="sec"><div class="sec-h"><h2>🏀 לוח אימונים שבועי</h2>${ADMIN_PW ? `<button class="btn sm" data-act="trainEdit">${TRAIN.edit ? "סגור עריכה" : "✏️ עריכה"}</button>` : ""}</div>
-    ${TRAIN.note ? `<div class="banner">📢 ${esc(TRAIN.note)}</div>` : ""}
+    ${trainNote() ? `<div class="banner">📢 ${esc(trainNote())}</div>` : ""}
     ${week ? `<div class="card pad tr-week">${week}</div>` : `<div class="card pad muted">עוד לא הוזן לוח אימונים.</div>`}
-    <p class="small muted" style="margin-top:6px">רק מי שיש לו את קוד הצ'אט רואה את הלוח הזה.</p></section>
+    <p class="small muted" style="margin-top:6px">הלוח חוזר על עצמו כל שבוע עד שהמנהל משנה אותו. רק מי שיש לו את קוד הצ'אט רואה אותו.</p></section>
   ${ADMIN_PW && TRAIN.edit ? `<form class="card pad sec" data-form="trainSave"><h2 style="margin-bottom:8px">עריכת הלוח</h2><div id="trRows">${(TRAIN.slots.length ? TRAIN.slots : [{}]).map(trainRow).join("")}</div>
     <button type="button" class="btn sm" data-act="trainAdd" style="margin-top:8px">+ עוד אימון</button>
-    <label class="f" style="margin-top:10px">הודעה לשבוע הזה (רשות)<input class="inp" name="tnote" maxlength="300" value="${esc(TRAIN.note)}" placeholder="למשל: ביום ג' אין אימון – יש משחק"></label>
+    <label class="f" style="margin-top:10px">הודעה לשבוע הזה (רשות)<input class="inp" name="tnote" maxlength="300" value="${esc(trainNote())}" placeholder="למשל: ביום חמישי אין אימון – יש משחק ב-17:30"><small class="muted">נעלמת לבד במוצאי שבת. הלוח עצמו נשאר לכל השבועות.</small></label>
     <button class="btn pri" style="margin-top:10px">שמור</button></form>` : ""}`;
 }
 
@@ -3412,7 +3449,9 @@ async function pushAnnounce() {
 Object.assign(FORMS, {
   async pollNew(f) {
     const opts = [0,1,2,3,4,5].map(i => f["o" + i].value.trim()).filter(Boolean);
-    const ts = (v) => v ? new Date(v).getTime() : 0, start = ts(f.start.value), end = ts(f.end.value);
+    const today = new Date().toLocaleDateString("en-CA");
+    const ts = (d, t) => (d || t) ? new Date(`${d || today}T${t || "00:00"}`).getTime() : 0;
+    const start = ts(f.start_d.value, f.start_t.value), end = ts(f.end_d.value, f.end_t.value);
     if (opts.length < 2) return toast("צריך לפחות 2 תשובות");
     if (end && end <= (start || Date.now())) return toast("זמן הסגירה צריך להיות אחרי הפתיחה");
     const res = await chatApi("POST", "/polls", { room:"main", body:{ q:f.q.value.trim(), opts, start, end } });
@@ -3429,8 +3468,9 @@ Object.assign(FORMS, {
   },
   async trainSave(f) {
     const slots = [...f.querySelectorAll(".tr-row")].map(r => ({ d:+r.querySelector("[name=d]").value, from:r.querySelector("[name=from]").value, to:r.querySelector("[name=to]").value, place:r.querySelector("[name=place]").value, note:r.querySelector("[name=note]").value })).filter(x => x.from);
-    const res = await chatApi("POST", "/training", { room:"main", body:{ slots, note:f.tnote.value } });
-    if (!chatRes(res)) return; Object.assign(TRAIN, { slots:res.slots, note:res.note, edit:false }); render(); toast("לוח האימונים נשמר ✓");
+    const note = f.tnote.value.trim(), noteUntil = !note ? 0 : note === trainNote() && TRAIN.noteUntil ? TRAIN.noteUntil : weekEnd();
+    const res = await chatApi("POST", "/training", { room:"main", body:{ slots, note, noteUntil } });
+    if (!chatRes(res)) return; Object.assign(TRAIN, { slots:res.slots, note:res.note, noteUntil:res.noteUntil || 0, edit:false }); render(); toast("לוח האימונים נשמר ✓");
   },
 });
 Object.assign(ACT, {

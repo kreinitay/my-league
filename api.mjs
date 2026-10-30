@@ -103,6 +103,13 @@ export const config = { path: ["/api/data", "/api/login", "/api/chat", "/api/cha
    חדר גדול אחד + 3 חדרים צדדיים. כדי לקרוא או לכתוב צריך "קוד צ'אט" שהמנהל קובע בהגדרות.
    כל שינוי בחדר (הודעה, תגובה, הצבעה, ניחוש) מקבל מספר seq, והדפדפן מבקש רק מה שהשתנה מאז הפעם הקודמת. */
 const ROOMS = ["main", "s1", "s2", "s3"];
+// לוח האימונים ההתחלתי (חוזר כל שבוע עד שהמנהל משנה). d: 0 = ראשון ... 6 = שבת · כל אימון חוץ משישי = שעה וחצי
+const DEF_TRAINING = { slots: [
+  { d: 0, from: "18:30", to: "20:00", place: "יפה נוף", note: "" },
+  { d: 3, from: "18:30", to: "20:00", place: "אלישבע", note: "" },
+  { d: 4, from: "17:00", to: "18:30", place: "יפה נוף", note: "בדרך כלל יש משחק ב-17:30 – המנהל יעדכן" },
+  { d: 5, from: "12:30", to: "14:30", place: "", note: "" },
+], note: "", noteUntil: 0 };
 const DEF_NAMES = { main: "הצ'אט הגדול", s1: "חדר צד 1", s2: "חדר צד 2", s3: "חדר צד 3" };
 const REACTS = ["👍", "🔥", "😂", "🏀", "👏"];
 const MAX_MSGS = 300, MAX_TEXT = 400, MAX_NAME = 20;
@@ -256,11 +263,12 @@ async function chatRoute(req, url, path, store, getRealPassword, dataStore) {
 
   /* ---- לוח אימונים שבועי – רק למי שיש קוד ---- */
   if (sub === "/training") {
-    if (req.method === "GET") return json({ ok: true, ...((await store.get("training", { type: "json" })) || { slots: [], note: "" }) });
+    if (req.method === "GET") return json({ ok: true, ...((await store.get("training", { type: "json" })) || DEF_TRAINING) });
     if (!isAdmin) return deny();
     const slots = (Array.isArray(b.slots) ? b.slots : []).slice(0, 14).map((x) => ({ d: Math.max(0, Math.min(6, Math.round(Number(x.d)) || 0)), from: clean(x.from, 5), to: clean(x.to, 5), place: clean(x.place, 60), note: clean(x.note, 60) }))
       .filter((x) => /^\d\d:\d\d$/.test(x.from)).sort((x, y) => x.d - y.d || x.from.localeCompare(y.from));
-    const doc = { slots, note: clean(b.note, 300), updated: Date.now() };
+    const note = clean(b.note, 300);
+    const doc = { slots, note, noteUntil: note && Number(b.noteUntil) > 0 ? Number(b.noteUntil) : 0, updated: Date.now() };
     await store.setJSON("training", doc);
     return json({ ok: true, ...doc });
   }
