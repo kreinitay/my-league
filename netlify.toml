@@ -1,0 +1,8 @@
+# כל הקבצים נמצאים באותה תיקייה (בלי תתי-תיקיות)
+[build]
+  publish = "."
+  functions = "."
+  command = "echo ready"
+
+[functions]
+  node_bundler = "esbuild"
