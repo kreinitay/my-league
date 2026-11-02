@@ -633,6 +633,8 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .pr-rules-t td{padding:6px 4px;border-bottom:1px solid var(--line)}.pr-rules-t td:last-child{text-align:left;white-space:nowrap}
 .pr-parts{display:block;color:var(--win)!important;font-size:11px}
 .hub-r.locked{flex-wrap:wrap}.hub-r.locked input{width:90px;text-align:center}
+.me-card{border-color:color-mix(in srgb,var(--tc,var(--accent)) 45%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--tc,var(--accent)) 12%,var(--card)),var(--card))}
+.modal-bg.me-first{background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px)}
 
 </style>
 </head>
@@ -673,6 +675,7 @@ const I = {
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>',
   chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.3-7 8-7s7 2.5 8 7"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
 };
 
@@ -1542,6 +1545,20 @@ function leaderFull(k, scope, minG) {
     </tbody></table></div>` : `<div class="muted">אין נתונים</div>`}`, (m) => m.classList.add("wide"));
 }
 
+// ברכה אישית בדף הבית: שם, ולשחקן – הנתונים שלו והמשחק הבא שלו
+function meHomeCard() {
+  const m = meGet(); if (!m) return "";
+  const p = myPlayer(), t = p && team(p.teamId), a = p && playerAgg(p.id);
+  const tid = p ? p.teamId : /^ph_/.test(m.role) ? myTeamId() : "";
+  const nx = tid && sortedGames().find(g => !isFinal(g) && (g.homeId === tid || g.awayId === tid));
+  const opp = nx && team(nx.homeId === tid ? nx.awayId : nx.homeId);
+  return `<section class="sec"><div class="card pad me-card" ${t ? `style="--tc:${esc(t.color)}"` : ""}>
+    <div class="split"><h2 style="margin:0">שלום, ${esc(m.name.split(" ")[0])} 👋</h2><button class="btn sm" data-act="chatEditMe">${esc(roleTag(m.role) || "אני")} · עריכה</button></div>
+    ${p ? `<div class="kpis" style="margin-top:10px">${isN(a.avg.pts) ? `<div class="kpi"><b>${f1(a.avg.pts)}</b><span>נק' למשחק</span></div>` : ""}${isN(a.avg.rate) ? `<div class="kpi"><b>${rtBadge(Math.round(a.avg.rate * 10) / 10)}</b><span>ציון ממוצע</span></div>` : ""}<div class="kpi"><b>${a.gp}</b><span>משחקים</span></div></div>
+      <a class="small more" href="#/player/${p.id}">כל הנתונים שלי ←</a>` : ""}
+    ${nx ? `<div class="small muted" style="margin-top:6px">המשחק הבא${p ? " שלך" : ""}: <a href="#/game/${nx.id}"><b>נגד ${esc(tn(opp) || "")}</b> · ${esc(fmtDate(nx.date))}${nx.time ? " · " + esc(nx.time) : ""}</a></div>` : ""}
+  </div></section>`;
+}
 function pageHome() {
   if (!DB.teams.length) return emptyLeague();
   const st = standings();
@@ -1570,6 +1587,7 @@ function pageHome() {
       <div class="kpi"><b>${done.length ? f1(totalPts / done.length / 2) : "—"}</b><span>נק' לקבוצה במשחק</span></div>
     </div>
   </section>
+  ${meHomeCard()}
   ${(() => { const m = roundMvps()[0]; return m ? `<section class="sec">${mvpCard(m)}</section>` : ""; })()}
   <div class="grid g2 sec">
     <div><div class="sec-h"><h2>טבלת הליגה</h2><a class="more" href="#/standings">לטבלה המלאה ←</a></div>${standingsTable(st, true)}</div>
@@ -1980,7 +1998,7 @@ function pagePlayer(id) {
   <div class="hero" style="${t ? `border-color:${esc(t.color)}55` : ""}">
     <div style="display:flex;gap:14px;align-items:center">
       <div class="jn" style="width:64px;height:64px;border-radius:18px;font-size:26px;background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</div>
-      <div><h1 style="margin:0">${esc(p.name)}</h1><div class="muted">${t ? badge(t, { full:true }) : ""}${a.manual ? ` <span class="badge">ממוצעים ידניים</span>` : ""}</div>
+      <div><h1 style="margin:0">${esc(p.name)}${myPlayer()?.id === p.id ? ` <span class="chip live">⭐ זה אתה</span>` : ""}</h1><div class="muted">${t ? badge(t, { full:true }) : ""}${a.manual ? ` <span class="badge">ממוצעים ידניים</span>` : ""}</div>
         <div class="row-actions" style="margin-top:8px"><a class="btn sm" href="#/compare?a=${p.id}">⚖️ השווה עם שחקן אחר</a><button class="btn sm" data-act="shareChat" data-t="player" data-id="${p.id}">💬 שתף בצ'אט</button></div></div>
     </div>
   </div>
@@ -3156,14 +3174,28 @@ function chatSchedule() {
   CHAT.timer = setTimeout(async () => { await chatFetch(); chatSchedule(); }, idle < 2 * 60000 ? 5000 : 15000);
 }
 function chatWake() { CHAT.lastAct = Date.now(); if (CHAT.paused || !CHAT.timer) { CHAT.paused = false; const pa = $("#chatPaused"); if (pa) pa.hidden = true; chatFetch().then(chatSchedule); } }
-async function chatJoin(body = {}) {
-  if (CHAT.joining) return; CHAT.joining = true;
+/* ---- מי אתה: נקבע פעם אחת בכניסה לאתר, ומשמש את כל האתר (לשוניות, ברכה, צ'אט) ---- */
+const meGet = () => { if (CHAT.user) return CHAT.user; try { return JSON.parse(LS.get("league_chat_me") || "null"); } catch { return null; } };
+const isPHme = () => { const m = meGet(); return !m || /^ph_/.test(m.role); };
+const myPlayer = () => { const m = meGet(); return m && /_player$/.test(m.role) && m.pid ? player(m.pid) : null; };
+async function identify(body = {}) {
+  if (MODE === "local") {                                   // בגרסה המקומית – נשמר רק בדפדפן
+    const u = { id:"local", name:body.name, role:body.role, pid:body.pid || "" };
+    LS.set("league_chat_me", JSON.stringify(u)); CHAT.user = u; return { ok:true, user:u };
+  }
   const res = await chatApi("POST", "/join", { body:{ ...body, token:chatTok() } });
-  CHAT.joining = false;
   if (res.ok) {
-    LS.set("league_chat_tok", res.token); CHAT.user = res.user; CHAT.rooms = res.rooms || []; CHAT.joined = true; CHAT.err = ""; CHAT.editMe = false; CHAT.lastAct = Date.now();
-    LS.set("league_chat_me", JSON.stringify(res.user)); CHAT.hub = null; CHAT.draft = null; POLLS.loaded = false; PRED.loaded = false; TRAIN.loaded = false;
-  } else { CHAT.err = CHAT_ERR[res.error] || "לא הצלחתי להתחבר"; CHAT.tried = true; if (["need-code","wrong-code","relogin"].includes(res.error)) CHAT.needCode = true; }
+    LS.set("league_chat_tok", res.token); LS.set("league_chat_me", JSON.stringify(res.user)); LS.set("league_me_ts", String(Date.now()));
+    CHAT.user = res.user; CHAT.rooms = res.rooms || []; CHAT.joined = !!res.enabled; CHAT.closed = !res.enabled; CHAT.err = ""; CHAT.lastAct = Date.now();
+    CHAT.hub = null; POLLS.loaded = false; PRED.loaded = false; TRAIN.loaded = false;
+  }
+  return res;
+}
+async function chatJoin() {
+  if (CHAT.joining) return; CHAT.joining = true;
+  const res = await identify({});
+  CHAT.joining = false;
+  if (!res.ok) { CHAT.err = CHAT_ERR[res.error] || "לא הצלחתי להתחבר"; CHAT.tried = true; if (res.error === "relogin" || res.status === 401) { LS.del("league_chat_tok"); } }
   if (onChatArea()) render();
 }
 
@@ -3195,29 +3227,46 @@ async function chatAnnounce() {
 function rosterSelect(name, teams, sel) {
   return `<select class="inp" name="${name}" data-act="chatWho"><option value="">לא ברשימה – אכתוב שם</option>${teams.map(t => `<optgroup label="${esc(tn(t))}">${roster(t.id).map(p => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(p.number ? p.number + " · " : "")}${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select>`;
 }
-function chatJoinForm(what = "") {
-  let prev = CHAT.draft || CHAT.user; if (!prev) try { prev = JSON.parse(LS.get("league_chat_me") || "null"); } catch {}
-  const role = prev?.role || "", pid = prev?.pid || "", mid = myTeamId(), others = DB.teams.filter(t => t.id !== mid).sort((a, b) => tn(a).localeCompare(tn(b), "he"));
-  const needCode = !canMod() && !(CHAT.editMe && CHAT.joined) && CHAT.needCode;
-  return `<section class="sec chat-join"><div class="sec-h"><h2>${what ? "🔒 " + esc(what) : CHAT.editMe ? "✏️ הפרטים שלי" : "💬 כניסה לצ'אט"}</h2></div>
-    <form class="card pad" data-form="chatJoin">
-      ${CHAT.err ? `<div class="banner issues" style="margin-bottom:12px">${esc(CHAT.err)}</div>` : ""}
+function meFormHtml(edit) {
+  const prev = meGet(), role = prev?.role || "", pid = prev?.pid || "", mid = myTeamId(), others = DB.teams.filter(t => t.id !== mid).sort((a, b) => tn(a).localeCompare(tn(b), "he"));
+  return `<h2>${edit ? "✏️ הפרטים שלי" : "👋 ברוכים הבאים!"}</h2>${edit ? "" : `<p class="muted" style="margin:4px 0 10px">לפני שנכנסים – ספר לנו מי אתה. האתר יזכור אותך.</p>`}
+    <form data-me-form>
       <label class="f">מי אתה?<select class="inp" name="role" required data-act="chatRole"><option value="">בחר…</option>${ROLE_KEYS.map(r => `<option value="${r}" ${r === role ? "selected" : ""}>${esc(roleL(r))}</option>`).join("")}</select></label>
       <label class="f" data-show="ph_player" ${role === "ph_player" ? "" : "hidden"} style="margin-top:8px">מי מהשחקנים?${rosterSelect("pid_ph", team(mid) ? [team(mid)] : [], role === "ph_player" ? pid : "")}</label>
       <label class="f" data-show="o_player" ${role === "o_player" ? "" : "hidden"} style="margin-top:8px">מי מהשחקנים?${rosterSelect("pid_o", others, role === "o_player" ? pid : "")}</label>
       <label class="f" id="chatNameF" style="margin-top:8px" ${pid && player(pid) ? "hidden" : ""}>השם שלך<input class="inp" name="name" maxlength="20" value="${esc(pid && player(pid) ? "" : prev?.name || "")}" placeholder="שם פרטי ושם משפחה"></label>
-      ${needCode ? `<label class="f" style="margin-top:8px">קוד הצ'אט<input class="inp" name="code" maxlength="40" required autocomplete="off" placeholder="את הקוד מקבלים מהמנהל"></label>` : ""}
-      <div class="row-actions" style="margin-top:12px"><button class="btn pri">${CHAT.editMe ? "שמור" : "כניסה"}</button>${CHAT.editMe ? `<button type="button" class="btn" data-act="chatEditMe">ביטול</button>` : ""}</div>
-      <ul class="chat-rules small muted"><li>רק לשחקני הליגה, ההורים והמאמנים. כותבים את השם האמיתי ובוחרים נכון מי אתה.</li><li>לא משתפים מספר טלפון, כתובת, בית ספר או סיסמאות.</li><li>מדברים יפה. המנהל רואה מי נכנס, יכול למחוק הודעות ולחסום.</li></ul>
-    </form></section>`;
+      <div class="me-err banner issues" hidden style="margin-top:10px"></div>
+      <div class="row-actions" style="margin-top:12px"><button class="btn pri">${edit ? "שמור" : "כניסה לאתר"}</button>${edit ? `<button type="button" class="btn" data-close>ביטול</button>` : ""}</div>
+      <ul class="chat-rules small muted"><li>כותבים את השם האמיתי ובוחרים נכון מי אתה.</li><li>בצ'אט לא משתפים מספר טלפון, כתובת, בית ספר או סיסמאות.</li></ul>
+    </form>`;
 }
-// כניסה אחת לכל אזור הצ'אט (צ'אט, סקרים, ניחושים, אימונים)
+// חלון "מי אתה?" – בכניסה הראשונה לאתר (חובה), או לעריכה
+function meModal(edit = false) {
+  if (meModal.open) return; meModal.open = true;
+  return modal(meFormHtml(edit), (m, close) => {
+    m.closest(".modal-bg").classList.add(edit ? "me-edit" : "me-first");
+    m.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault(); const f = e.target, er = f.querySelector(".me-err");
+      const role = f.role.value, sel = role === "ph_player" ? f.pid_ph.value : role === "o_player" ? f.pid_o.value : "", p = player(sel);
+      const name = (p ? p.name : f.name.value.trim()).slice(0, 20);
+      if (!role || !name) { er.textContent = CHAT_ERR.who; er.hidden = false; return; }
+      f.querySelector("button.pri").disabled = true;
+      const res = await identify({ role, name, pid:p ? p.id : "" });
+      f.querySelector("button.pri").disabled = false;
+      if (!res.ok) { er.textContent = CHAT_ERR[res.error] || "לא הצלחתי לשמור – נסה שוב"; er.hidden = false; return; }
+      close(true);
+    });
+  }).then((ok) => { meModal.open = false; if (ok) { toast(`שלום ${meGet()?.name || ""} 👋`); render(); } else if (!edit && !meGet()) setTimeout(() => meModal(false), 50); });
+}
+// כניסה לכל אזור הצ'אט (צ'אט, סקרים, ניחושים, אימונים) – לפי מי שנכנס לאתר
 function chatGate(what = "") {
   if (MODE === "local") return `<div class="card pad muted">הצ'אט, הסקרים, הניחושים והאימונים עובדים רק באתר האמיתי שעל Netlify (פה זו גרסה מקומית לבדיקה).</div>`;
-  if (CHAT.editMe) return chatJoinForm();
+  if (!meGet()) { setTimeout(() => meModal(false)); return `<div class="card pad muted">קודם ספר לנו מי אתה 🙂 <button class="btn sm pri" data-act="chatEditMe">מי אני</button></div>`; }
   if (CHAT.joined) return "";
-  if (chatTok() && !CHAT.err && !CHAT.tried) { if (!CHAT.joining) setTimeout(() => chatJoin()); return `<div class="card pad cm-empty">מתחבר…</div>`; }
-  return chatJoinForm(what);
+  if (CHAT.closed) return `<div class="card pad muted">💬 ${esc(what || "הצ'אט")} סגור כרגע.</div>`;
+  if (CHAT.err) return `<div class="card pad"><div class="banner issues">${esc(CHAT.err)}</div><button class="btn sm" data-act="chatRetry">נסה שוב</button></div>`;
+  if (!CHAT.joining) setTimeout(() => chatJoin());
+  return `<div class="card pad cm-empty">מתחבר…</div>`;
 }
 
 /* ---- מרכז הצ'אטים ---- */
@@ -3287,11 +3336,11 @@ function pagePeople() {
 /* הגדרות הצ'אט למנהל (בטאב הגדרות) */
 function chatCfgCard() {
   return `<form class="card pad sec" data-form="chatCfg" id="chatCfg"><h2 style="margin-bottom:6px">💬 צ'אט</h2>
-    <p class="small muted">5 חדרים: 1 כולם · 2 שחקני הקבוצה · 3 שחקנים ומאמן · 4-5 מי שתוסיף בעמוד "אנשים", או מי שיודע את הקוד של החדר. כל קוד – לפחות 4 תווים.</p>
+    <p class="small muted">כל מי שנכנס לאתר כותב שם ובוחר מי הוא – ואיתם נכנס לצ'אט (בלי קוד). 5 חדרים: 1 כולם · 2 שחקני הקבוצה · 3 שחקנים ומאמן · 4-5 מי שתוסיף בעמוד "אנשים", או מי שיודע את הקוד של החדר (לפחות 4 תווים).</p>
     <div class="cm-empty" data-loading>${MODE === "local" ? "הצ'אט עובד רק באתר שעל Netlify." : "טוען הגדרות…"}</div>
     <div data-fields hidden>
       <label class="check-row"><input type="checkbox" name="enabled"> הצ'אט פתוח</label>
-      <div class="fgrid"><label class="f">קוד כניסה לצ'אט<input class="inp" name="code" maxlength="40" autocomplete="off" placeholder="ריק = נכנסים רק עם שם ו'מי אתה'"></label>
+      <div class="fgrid">
       <label class="f">קוד לחדר 4<input class="inp" name="rc_s3" maxlength="40" autocomplete="off" placeholder="ריק = רק מי שתוסיף"></label>
       <label class="f">קוד לחדר 5<input class="inp" name="rc_s4" maxlength="40" autocomplete="off" placeholder="ריק = רק מי שתוסיף"></label>
       ${["main","s1","s2","s3","s4"].map((id, i) => `<label class="f">שם חדר ${i + 1}<input class="inp" name="n_${id}" maxlength="30"></label>`).join("")}</div>
@@ -3307,7 +3356,7 @@ async function chatLoadCfg() {
   const res = await chatApi("GET", "/config");
   const f2 = $("#chatCfg"); if (!f2) return;
   if (!res.ok) { f2.querySelector("[data-loading]").textContent = res.status === 401 ? "צריך להיכנס שוב כמנהל" : "לא הצלחתי לטעון את הגדרות הצ'אט"; return; }
-  f2.enabled.checked = !!res.enabled; f2.code.value = res.code || ""; f2.rc_s3.value = res.roomCodes?.s3 || ""; f2.rc_s4.value = res.roomCodes?.s4 || "";
+  f2.enabled.checked = !!res.enabled; f2.rc_s3.value = res.roomCodes?.s3 || ""; f2.rc_s4.value = res.roomCodes?.s4 || "";
   for (const id of ["main","s1","s2","s3","s4"]) f2["n_" + id].value = res.names?.[id] || "";
   f2.querySelector("[data-loading]").hidden = true; f2.querySelector("[data-fields]").hidden = false;
 }
@@ -3520,13 +3569,6 @@ Object.assign(FORMS, {
     if (!chatRes(res)) return;
     toast(`נכנסת ל${res.room.name} ✓`); CHAT.hub = null; await hubLoad(); go("#/chat?r=" + res.room.id);
   },
-  chatJoin(f) {
-    const role = f.role.value, pidSel = role === "ph_player" ? f.pid_ph.value : role === "o_player" ? f.pid_o.value : "", p = player(pidSel);
-    const name = (p ? p.name : f.name.value.trim()).slice(0, 20);
-    if (!role || !name) return toast(CHAT_ERR.who);
-    CHAT.err = ""; CHAT.tried = false; CHAT.draft = { role, name, pid:p ? p.id : "" };     // אם יבקשו קוד – לא למלא שוב
-    chatJoin({ role, name, pid:p ? p.id : "", ...(f.code ? { code:f.code.value.trim() } : {}) });
-  },
   async chatSend(f) {
     const ta = f.text, text = ta.value.trim(); if ((!text && !CHAT.share) || f.dataset.sending) return;
     f.dataset.sending = "1";
@@ -3536,7 +3578,7 @@ Object.assign(FORMS, {
     ta.value = ""; ta.style.height = ""; CHAT.reply = null; CHAT.share = null; CHAT.emoji = false; chatExtraDraw(); upsert(res.msg); chatDraw(true); ta.focus();
   },
   async chatCfg(f) {
-    const body = { enabled:f.enabled.checked, code:f.code.value.trim(), roomCodes:{ s3:f.rc_s3.value.trim(), s4:f.rc_s4.value.trim() }, names:Object.fromEntries(["main","s1","s2","s3","s4"].map(id => [id, f["n_" + id].value.trim()])) };
+    const body = { enabled:f.enabled.checked, roomCodes:{ s3:f.rc_s3.value.trim(), s4:f.rc_s4.value.trim() }, names:Object.fromEntries(["main","s1","s2","s3","s4"].map(id => [id, f["n_" + id].value.trim()])) };
     const res = await chatApi("PUT", "/config", { body });
     if (res.ok) { toast("הגדרות הצ'אט נשמרו ✓"); CHAT.hub = null; chatAnnounce(); }
     else toast(res.error === "short-code" ? "כל קוד צריך להיות לפחות 4 תווים" : res.status === 401 ? "צריך להיכנס שוב כמנהל" : "לא נשמר");
@@ -3579,9 +3621,10 @@ Object.assign(FORMS, {
 });
 Object.assign(ACT, {
   chatRole(el) { const f = el.form; for (const x of f.querySelectorAll("[data-show]")) x.hidden = x.dataset.show !== el.value;
-    const sel = el.value === "ph_player" ? f.pid_ph : el.value === "o_player" ? f.pid_o : null; $("#chatNameF").hidden = !!(sel && sel.value); },
-  chatWho(el) { const nf = $("#chatNameF"); if (nf) nf.hidden = !!el.value; },
-  chatEditMe() { CHAT.editMe = !CHAT.editMe; CHAT.err = ""; render(); },
+    const sel = el.value === "ph_player" ? f.pid_ph : el.value === "o_player" ? f.pid_o : null; f.querySelector("#chatNameF").hidden = !!(sel && sel.value); },
+  chatWho(el) { const nf = el.form?.querySelector("#chatNameF"); if (nf) nf.hidden = !!el.value; },
+  chatEditMe() { meModal(!!meGet()); },
+  chatRetry() { CHAT.err = ""; CHAT.tried = false; render(); },
   chatWake() { chatWake(); },
   chatReply(el) { const m = (CHAT.msgs[CHAT.room] || []).find(x => x.id === el.dataset.id); if (!m) return; CHAT.reply = { id:m.id, name:m.name, text:m.text }; chatExtraDraw(); $("form[data-form=chatSend] textarea")?.focus(); },
   chatReplyX() { CHAT.reply = null; chatExtraDraw(); },
@@ -3643,6 +3686,13 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 
 /* ================= ניתוב ================= */
 const NAV = [["","בית",I.home],["standings","טבלה",I.table],["games","משחקים",I.games],["players","שחקנים",I.players],["myteam","הקבוצה שלי",I.star],["chat","צ'אט",I.chat]];
+// הלשוניות לפי מי אתה: שחקן מקבל "אני", מי שלא מהקבוצה לא רואה "הקבוצה שלי" (המנהל והצוות רואים הכול)
+function navList() {
+  const mp = myPlayer(), staff = !!ADMIN_PW;
+  const out = NAV.filter(([k]) => k !== "myteam" || staff || isPHme());
+  if (mp) out.splice(out.findIndex(([k]) => k === "chat"), 0, ["player/" + mp.id, "אני", I.user]);
+  return out;
+}
 // 6 לשוניות ראשיות, ובתוך חלק מהן לשוניות קטנות
 const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"]], players:[["players","שחקנים"],["leaders","מובילים"],["compare","השוואה"]],
   myteam:[["myteam","סטטיסטיקה"],["training","אימונים"]], chat:[["chat","צ'אט"],["polls","סקרים"],["predict","ניחושים"],["people","אנשים", "mod"]] };
@@ -3691,10 +3741,11 @@ function render(keepFocus) {
   buildJump();
   if (focusAct) { const el = app.querySelector(`[data-act="${focusAct}"]`); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch {} } }
 
-  const navPage = page === "team" ? (parts[1] === myTeamId() ? "myteam" : "standings") : NAV_OF[page] || page;
+  let navPage = page === "team" ? (parts[1] === myTeamId() ? "myteam" : "standings") : NAV_OF[page] || page;
   const MT = team(myTeamId()); const navIcon = (k, ic) => k === "myteam" && MT && okImg(MT.logo) ? `<img class="nav-logo" src="${MT.logo}" alt="">` : ic;
-  $("#topnav").innerHTML = NAV.map(([k, l]) => `<a href="#/${k}" class="${navPage === k ? "on" : ""}">${l}</a>`).join("");
-  $("#bnav").innerHTML = NAV.map(([k, l, ic]) => `<a href="#/${k}" class="${navPage === k ? "on" : ""}">${navIcon(k, ic)}<span>${l}</span></a>`).join("");
+  const NV = navList(), mp = myPlayer(); if (mp && page === "player" && parts[1] === mp.id) navPage = "player/" + mp.id;
+  $("#topnav").innerHTML = NV.map(([k, l]) => `<a href="#/${k}" class="${navPage === k ? "on" : ""}">${l}</a>`).join("");
+  $("#bnav").innerHTML = NV.map(([k, l, ic]) => `<a href="#/${k}" class="${navPage === k ? "on" : ""}">${navIcon(k, ic)}<span>${l}</span></a>`).join("");
   const bi = $("#brandIcon"); if (bi) bi.innerHTML = okImg(DB.league.logo) ? `<img class="ball" src="${DB.league.logo}" alt="">` : DEFAULT_BALL;
   const fav = document.querySelector('link[rel="icon"]'); if (fav) { if (!render.favDefault) render.favDefault = fav.getAttribute("href"); fav.setAttribute("href", okImg(DB.league.logo) ? DB.league.logo : render.favDefault); }
   $("#leagueName").textContent = DB.league.name; $("#leagueSeason").textContent = DB.league.season ? "עונת " + DB.league.season : "";
@@ -3819,7 +3870,10 @@ function demoData() {
 
 /* ================= הפעלה ================= */
 applyTheme();
-load().then(() => { render(); }).catch((e) => { console.error(e); $("#app").innerHTML = `<div class="card empty">שגיאה בטעינה</div>`; });
+load().then(() => { render();
+  if (!meGet()) setTimeout(() => meModal(false), 300);
+  else if (MODE === "server" && chatTok() && Date.now() - (+LS.get("league_me_ts") || 0) > 6 * 3600e3) identify({}).then(r => { if (r.ok) render(true); else if (r.error === "blocked") { CHAT.err = CHAT_ERR.blocked; } });
+}).catch((e) => { console.error(e); $("#app").innerHTML = `<div class="card empty">שגיאה בטעינה</div>`; });
 
 </script>
 </body>

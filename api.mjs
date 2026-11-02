@@ -231,13 +231,12 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
     if (!isAdmin) return deny();
     if (req.method === "GET") return json({ ok: true, ...cfg });
     const names = {}; for (const r of ROOMS) names[r] = clean(b.names?.[r], 30) || DEF_NAMES[r];
-    // קוד כניסה לצ'אט – רשות (ריק = נכנסים רק עם שם ו"מי אתה"). קודים לחדרים 4-5 – רשות
-    const code = clean(b.code, 40), roomCodes = {};
+    // אין קוד כניסה לצ'אט – נכנסים עם שם ו"מי אתה". קודים לחדרים 4-5 – רשות
+    const code = "", roomCodes = {};
     for (const r of ["s1", "s2", "s3", "s4"]) { const c = clean(b.roomCodes?.[r], 40); if (c) roomCodes[r] = c; }
-    if ((code && code.length < 4) || Object.values(roomCodes).some((c) => c.length < 4)) return json({ ok: false, error: "short-code" }, 400);
+    if (Object.values(roomCodes).some((c) => c.length < 4)) return json({ ok: false, error: "short-code" }, 400);
     const res = await updateKey(store, "config", () => ({}), (c) => {
-      if (code !== (c.code || "")) c.epoch = (c.epoch || 1) + 1;        // קוד חדש = כולם צריכים להיכנס שוב עם הקוד החדש
-      c.enabled = !!b.enabled; c.code = code; c.names = names; c.members ||= {}; c.roomCodes = roomCodes;
+        c.enabled = !!b.enabled; c.code = code; c.names = names; c.members ||= {}; c.roomCodes = roomCodes;
       return { ok: true, enabled: c.enabled, code: c.code, names: c.names, epoch: c.epoch || 1, roomCodes };
     });
     return json(res);
@@ -263,17 +262,12 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
   const users = (await store.get("users", { type: "json" })) || {};
   const tok = req.headers.get("x-chat-token") || b.token || "";
   let me = tok ? Object.values(users).find((u) => u.th === hashTok(tok)) : null;
-  if (me && (me.blocked || (!isMod && cfg.code && me.epoch !== cfg.epoch))) me = me.blocked ? Object.assign(me, { _blocked: true }) : null;
+  if (me && me.blocked) me = me.blocked ? Object.assign(me, { _blocked: true }) : null;
 
+  // כניסה לאתר: שם + "מי אתה" (משמש את כל האתר, לא רק את הצ'אט) – עובד גם כשהצ'אט סגור
   if (sub === "/join" && req.method === "POST") {
-    if (!cfg.enabled && !isMod) return json({ ok: false, error: "closed" }, 403);
     if (me?._blocked) return json({ ok: false, error: "blocked" }, 403);
     const wantsProfile = b.name !== undefined || b.role !== undefined;
-    if (!me && !isMod && cfg.code) {
-      const given = clean(b.code, 40);
-      if (!given) return json({ ok: false, error: tok && !wantsProfile ? "relogin" : "need-code" }, 401);
-      if (!sameSecret(given, cfg.code)) { await sleep(700); return json({ ok: false, error: tok && !wantsProfile ? "relogin" : "wrong-code" }, 401); }
-    }
     const name = clean(b.name, MAX_NAME), role = ROLES.includes(b.role) ? b.role : "", pid = cleanId(b.pid);
     if (!me && (!name || !role)) return json({ ok: false, error: "who" }, 400);
     // מוצאים לפי ה-token (גם אם הקוד השתנה) – כדי שאותו אדם יישאר אותו אדם
@@ -281,14 +275,14 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
     const token = old ? tok : randomBytes(18).toString("base64url");
     const res = await updateKey(store, "users", () => ({}), (d) => {
       let u = old && d[old.id];
-      if (!u) { if (Object.keys(d).length >= 1000) return { error: "full" }; u = { id: newId(), th: hashTok(token), created: now, joins: 0 }; d[u.id] = u; }
+      if (!u) { if (Object.keys(d).length >= 3000) return { error: "full" }; u = { id: newId(), th: hashTok(token), created: now, joins: 0 }; d[u.id] = u; }
       if (u.blocked) return { error: "blocked" };
       if (name) u.name = name; if (role) u.role = role; if (wantsProfile) u.pid = pid;
       u.epoch = cfg.epoch; u.last = now; u.joins = (u.joins || 0) + 1;
       return { ok: true, u: { ...u } };
     });
     if (res.error) return json({ ok: false, error: res.error }, res.error === "blocked" ? 403 : 503);
-    return json({ ok: true, token, user: pubUser(res.u), enabled: cfg.enabled, rooms: roomsFor(cfg, res.u, isMod), staff: lvl || "" });
+    return json({ ok: true, token, user: pubUser(res.u), enabled: cfg.enabled || isMod, rooms: cfg.enabled || isMod ? roomsFor(cfg, res.u, isMod) : [], staff: lvl || "" });
   }
 
   if (!cfg.enabled && !isMod) return json({ ok: false, error: "closed" }, 403);
