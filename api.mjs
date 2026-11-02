@@ -355,7 +355,7 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
     return json({ ok: true, room: { id: r, name: cfg.names[r] } });
   }
 
-  /* ---- סקרים: שאלה + 2-6 תשובות, אפשר לתזמן, ואפשר להציג רק לסוגים מסוימים ---- */
+  /* ---- סקרים: שאלה + 2-32 תשובות, אפשר לתזמן, ואפשר להציג רק לסוגים מסוימים ---- */
   if (sub === "/polls" || sub === "/polls/vote") {
     const sees = (p) => isMod || !p.roles?.length || (me && p.roles.includes(me.role));
     const view = (p) => {
@@ -382,7 +382,7 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
       const id = cleanId(b.id);
       if (b.del) { d.list = d.list.filter((x) => x.id !== id); return { ok: true }; }
       if (b.closeNow) { const p = d.list.find((x) => x.id === id); if (p) p.end = now; return { ok: true }; }
-      const q = clean(b.q, 160), opts = (Array.isArray(b.opts) ? b.opts : []).map((o) => clean(o, 60)).filter(Boolean).slice(0, 6);
+      const q = clean(b.q, 160), opts = (Array.isArray(b.opts) ? b.opts : []).map((o) => clean(o, 60)).filter(Boolean).slice(0, 32);
       if (!q || opts.length < 2) return { error: "empty" };
       const start = Number(b.start) > 0 ? Number(b.start) : now, end = Number(b.end) > start ? Number(b.end) : 0;
       const roles = (Array.isArray(b.roles) ? b.roles : []).filter((r) => ROLES.includes(r));
@@ -401,14 +401,19 @@ async function chatRoute(req, url, path, store, lvl, dataStore, pushStore) {
     return json({ ok: true, preds: d, names });
   }
   if (sub === "/predict" && req.method === "POST") {
-    // ניחוש = תוצאה, ובונוס רשות: מי יהיה הקלע המוביל (tp) וכמה נקודות יקלע (tpp)
-    const picks = (Array.isArray(b.picks) ? b.picks : []).slice(0, 12).map((x) => ({ gid: cleanId(x.gid), h: Math.round(Number(x.h)), a: Math.round(Number(x.a)), tp: cleanId(x.tp), tpp: x.tpp === "" || x.tpp == null ? null : Math.round(Number(x.tpp)) }))
-      .filter((x) => x.gid && x.h >= 0 && x.h <= 250 && x.a >= 0 && x.a <= 250 && (x.tpp === null || (x.tpp >= 0 && x.tpp <= 100)));
+    // ניחוש = תוצאה, ובונוסים (רשות): קלע מוביל (tp) וכמה יקלע (tpp), מי מובילה במחצית (hf 0/1), מי מנצחת ברבע 1 (q1 0/1),
+    // כמה שלשות במשחק (t3), באיזה רבע הכי הרבה נקודות (bq 1-4)
+    const num = (v, lo, hi) => { if (v === "" || v == null) return null; const n = Math.round(Number(v)); return Number.isFinite(n) && n >= lo && n <= hi ? n : undefined; };
+    const picks = (Array.isArray(b.picks) ? b.picks : []).slice(0, 20).map((x) => ({ gid: cleanId(x.gid), h: Math.round(Number(x.h)), a: Math.round(Number(x.a)), tp: cleanId(x.tp),
+      tpp: num(x.tpp, 0, 100), hf: num(x.hf, 0, 1), q1: num(x.q1, 0, 1), t3: num(x.t3, 0, 80), bq: num(x.bq, 1, 4) }))
+      .filter((x) => x.gid && x.h >= 0 && x.h <= 250 && x.a >= 0 && x.a <= 250 && [x.tpp, x.hf, x.q1, x.t3, x.bq].every((v) => v !== undefined));
     if (!picks.length) return json({ ok: false, error: "empty" }, 400);
     const data = await dataStore.get(KEY, { type: "json" });
-    const okPicks = []; for (const x of picks) if (!(await gameLocked(dataStore, x.gid, data))) okPicks.push(x);
+    // רק משחקים שעוד לא התחילו, ושמתחילים ב-10 הימים הקרובים
+    const limit = new Date(now + 10 * 864e5).toISOString().slice(0, 10);
+    const okPicks = []; for (const x of picks) { const g = data?.data?.games?.find((y) => y.id === x.gid); if (g && (g.date || "") <= limit && !(await gameLocked(dataStore, x.gid, data))) okPicks.push(x); }
     if (!okPicks.length) return json({ ok: false, error: "closed" }, 409);
-    const res = await updateKey(store, "preds", () => ({}), (d) => { for (const x of okPicks) (d[x.gid] ||= {})[who.id] = x.tp ? [x.h, x.a, x.tp, x.tpp] : [x.h, x.a]; return { ok: true, saved: okPicks.length, locked: picks.length - okPicks.length }; });
+    const res = await updateKey(store, "preds", () => ({}), (d) => { for (const x of okPicks) (d[x.gid] ||= {})[who.id] = [x.h, x.a, x.tp || null, x.tpp, x.hf, x.q1, x.t3, x.bq]; return { ok: true, saved: okPicks.length, locked: picks.length - okPicks.length }; });
     return res.error ? json({ ok: false, error: res.error }, 503) : json(res);
   }
 

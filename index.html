@@ -635,6 +635,18 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .hub-r.locked{flex-wrap:wrap}.hub-r.locked input{width:90px;text-align:center}
 .me-card{border-color:color-mix(in srgb,var(--tc,var(--accent)) 45%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--tc,var(--accent)) 12%,var(--card)),var(--card))}
 .modal-bg.me-first{background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px)}
+.poll-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:480px){.poll-opts{grid-template-columns:1fr}}
+.poll-opt{display:flex;gap:4px}.poll-opt input{flex:1;min-width:0}
+.pr-bonus-g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.pr-bonus .f.small{font-size:12px;margin-top:6px}
+.pr-rules-t{table-layout:fixed}
+.pr-rules-t td:first-child{word-break:break-word}
+.pr-rules-t td:last-child{white-space:normal!important;width:92px;font-size:12px;text-align:center}
+.pr-rules-g{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+@media(max-width:420px){.pr-rules-g{grid-template-columns:1fr}}
+.pr-rules-g div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;background:var(--card2);font-size:13px}
+.pr-rules-g b{color:var(--win);white-space:nowrap}
 
 </style>
 </head>
@@ -3388,13 +3400,21 @@ function pollCard(p) {
     ${canMod() ? `<div class="row-actions" style="margin-top:8px">${!closed && !sched ? `<button class="btn sm" data-act="pollClose" data-id="${p.id}">סגור עכשיו</button>` : ""}<button class="btn sm danger" data-act="pollDel" data-id="${p.id}">מחק</button></div>` : ""}</div>`;
 }
 const pollsListHtml = () => !POLLS.loaded ? `<div class="card pad cm-empty">טוען…</div>` : POLLS.list.length ? POLLS.list.map(pollCard).join("") : `<div class="card pad cm-empty">עוד אין סקרים</div>`;
+// שורת תשובה בסקר חדש – 2 ראשונות חובה, אפשר להוסיף עד 32
+function pollOptRow(i) {
+  return `<div class="poll-opt"><input class="inp" name="opt" maxlength="60" placeholder="תשובה ${i + 1}" ${i < 2 ? "required" : ""}>${i >= 2 ? `<button type="button" class="btn sm danger" data-act="pollRmOpt" aria-label="הסר">✕</button>` : ""}</div>`;
+}
+function pollOptCount() { const box = $("#pollOpts"); if (!box) return 0; const n = box.querySelectorAll(".poll-opt").length;
+  box.querySelectorAll("input[name=opt]").forEach((x, i) => { x.placeholder = `תשובה ${i + 1}`; });
+  const c = $("#pollOptN"); if (c) c.textContent = `${n} / 32`; const add = $("[data-act=pollAddOpt]"); if (add) add.disabled = n >= 32; return n; }
 function pagePolls() {
   const gate = chatGate("סקרים"); if (gate) return gate;
   if (!POLLS.loaded) setTimeout(pollsLoad);
-  const optIn = (i) => `<input class="inp" name="o${i}" maxlength="60" placeholder="תשובה ${i + 1}${i < 2 ? "" : " (רשות)"}" ${i < 2 ? "required" : ""}>`;
+  const optIn = (i) => pollOptRow(i);
   return `${canMod() ? `<details class="card pad sec poll-new"><summary><b>➕ סקר חדש</b></summary>
     <form data-form="pollNew" style="margin-top:10px"><label class="f">השאלה<input class="inp" name="q" maxlength="160" required placeholder="למשל: מי יהיה שחקן העונה?"></label>
-    <div class="fgrid" style="margin-top:8px">${[0,1,2,3,4,5].map(optIn).join("")}</div>
+    <div class="poll-opts" id="pollOpts" style="margin-top:8px">${[0, 1].map(optIn).join("")}</div>
+    <button type="button" class="btn sm" data-act="pollAddOpt" style="margin-top:6px">+ עוד תשובה</button> <small class="muted" id="pollOptN">2 / 32</small>
     <div class="fgrid" style="margin-top:8px"><label class="f">נפתח<span class="dt-row"><input class="inp" type="date" name="start_d">${timeSel('name="start_t"')}</span><small class="muted">ריק = עכשיו</small></label>
     <label class="f">נסגר<span class="dt-row"><input class="inp" type="date" name="end_d">${timeSel('name="end_t"')}</span><small class="muted">ריק = לא נסגר לבד</small></label></div>
     <div class="f" style="margin-top:8px">למי להציג? <small class="muted">(בלי סימון = לכולם)</small><div class="poll-roles">${ROLE_KEYS.map(r => `<label class="check-row"><input type="checkbox" name="roles" value="${r}"> ${esc(roleL(r))}</label>`).join("")}</div></div>
@@ -3413,15 +3433,15 @@ async function predLoad() {
 }
 const gameLockedLocal = (g) => !g || isFinal(g) || g.status === "live" || isN(g.homeScore) || isN(g.awayScore) || (g.date && Date.now() > Date.parse(g.date + "T" + (/^\d\d:\d\d$/.test(g.time || "") ? g.time : "23:59") + ":00+02:00"));
 /* ניקוד הניחושים – נקודות על כמה דברים, ולא רק על ניחוש מדויק */
-const PRED_RULES = [["הקבוצה המנצחת", "3"], ["הפרש קרוב (עד 3) + מנצחת נכונה", "+2"], ["נקודות של קבוצה קרובות (עד 5) – גם אם המנצחת לא נכונה", "+1 לכל קבוצה"],
-  ["נקודות של קבוצה מדויקות", "+2 לכל קבוצה"], ["סך הנקודות במשחק קרוב (עד 5)", "+1"], ["בונוס תוצאה מדויקת", "+3"],
-  ["⭐ רשות: הקלע המוביל במשחק", "+3"], ["⭐ רשות: כמה נקודות הוא יקלע (מדויק / עד 2 / עד 4)", "+3 / +2 / +1"]];
+const PRED_RULES = [["ניחשת מי מנצחת", "3"], ["הפרש קרוב (עד 3)", "2"], ["הפרש מדויק", "2"], ["נקודות קבוצה קרובות (עד 5)", "1"], ["נקודות קבוצה מדויקות", "2"],
+  ["סך נקודות קרוב (עד 5)", "1"], ["סך נקודות מדויק", "2"], ["תוצאה מדויקת", "3"], ["ניחשת צמוד – והיה צמוד", "1"], ["ניחשת ניצחון ענק – והיה", "1"],
+  ["⭐ קלע מוביל", "3"], ["⭐ כמה יקלע: מדויק / קרוב", "3 / 2 / 1"], ["⭐ מי מובילה במחצית", "2"], ["⭐ מי מנצחת ברבע 1", "1"], ["⭐ כמה שלשות: מדויק / קרוב", "3 / 1"], ["⭐ הרבע הכי גבוה", "2"]];
 function topScorers(g) {
   const xs = Object.entries(g.box || {}).map(([pid, r]) => [pid, val(r, "pts")]).filter(x => isN(x[1]));
   if (!xs.length) return null; const m = Math.max(...xs.map(x => x[1])); return { ids: xs.filter(x => x[1] === m).map(x => x[0]), pts: m };
 }
 function predScore(guess, g) {
-  const [h, a, tp, tpp] = guess, H = g.homeScore, A = g.awayScore, parts = [];
+  const [h, a, tp, tpp, hf, q1, t3, bq] = guess, H = g.homeScore, A = g.awayScore, parts = [];
   const add = (l, n) => { if (n) parts.push([l, n]); };
   const winOk = (h > a) === (H > A) && h !== a;
   add("מנצחת", winOk ? 3 : 0);
@@ -3429,6 +3449,20 @@ function predScore(guess, g) {
   for (const [x, X] of [[h, H], [a, A]]) add(x === X ? "נקודות מדויקות" : "נקודות קרובות", x === X ? 2 : Math.abs(x - X) <= 5 ? 1 : 0);
   add("סך הנקודות", Math.abs((h + a) - (H + A)) <= 5 ? 1 : 0);
   add("תוצאה מדויקת", h === H && a === A ? 3 : 0);
+  add("הפרש מדויק", winOk && (h - a) === (H - A) ? 2 : 0);
+  add("סך נקודות מדויק", h + a === H + A ? 2 : 0);
+  add("משחק צמוד", Math.abs(H - A) <= 5 && Math.abs(h - a) <= 5 ? 1 : 0);
+  add("ניצחון ענק", winOk && Math.abs(H - A) >= 20 && Math.abs(h - a) >= 20 ? 1 : 0);
+  // בונוסים שצריכים נתוני רבעים/שלשות – נספרים רק אם הוזנו למשחק
+  const QH = gameQuarters(g, g.homeId), QA = gameQuarters(g, g.awayId);
+  if (QH && QA) {
+    const hH = QH.qs[0] + QH.qs[1], hA = QA.qs[0] + QA.qs[1];
+    if (isN(hf) && hH !== hA) add("מובילה במחצית", (hf === 0) === (hH > hA) ? 2 : 0);
+    if (isN(q1) && QH.qs[0] !== QA.qs[0]) add("רבע ראשון", (q1 === 0) === (QH.qs[0] > QA.qs[0]) ? 1 : 0);
+    if (isN(bq)) { const tot = [0, 1, 2, 3].map(i => QH.qs[i] + QA.qs[i]), m = Math.max(...tot); add("הרבע הכי גבוה", tot[bq - 1] === m ? 2 : 0); }
+  }
+  if (isN(t3)) { const x = teamGameStats(g, g.homeId).fg3m, y = teamGameStats(g, g.awayId).fg3m;
+    if (isN(x) && isN(y)) { const d = Math.abs(t3 - (x + y)); add("שלשות במשחק", d === 0 ? 3 : d <= 2 ? 1 : 0); } }
   if (tp) {
     const ts = topScorers(g), r = g.box?.[tp], real = r && val(r, "pts");
     if (ts) add("קלע מוביל", ts.ids.includes(tp) ? 3 : 0);
@@ -3448,22 +3482,31 @@ function predTable() {
 function pagePredict() {
   const gate = chatGate("ניחושים"); if (gate) return gate;
   if (!PRED.loaded) { setTimeout(predLoad); return `<div class="card pad cm-empty">טוען…</div>`; }
-  const myId = CHAT.user?.id || "admin", up = sortedGames().filter(g => !gameLockedLocal(g)).slice(0, 6);
+  const lim = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+  const myId = CHAT.user?.id || "admin", up = sortedGames().filter(g => !gameLockedLocal(g) && (g.date || "") <= lim);
   const rows = up.map(g => { const H = team(g.homeId), A = team(g.awayId), my = PRED.preds[g.id]?.[myId];
+    const pick2 = (v) => `<option value="">בלי</option><option value="0" ${v === 0 ? "selected" : ""}>${esc(tn(H))}</option><option value="1" ${v === 1 ? "selected" : ""}>${esc(tn(A))}</option>`;
     const plOpts = [H, A].map(t => `<optgroup label="${esc(tn(t))}">${roster(t.id).map(p => `<option value="${p.id}" ${my?.[2] === p.id ? "selected" : ""}>${esc(p.number ? p.number + " · " : "")}${esc(p.name)}</option>`).join("")}</optgroup>`).join("");
     return `<div class="pr-row"><div class="pr-d small muted">${esc(fmtDate(g.date, true))}${g.time ? " · " + esc(g.time) : ""}${g.round ? ` · מחזור ${esc(g.round)}` : ""}</div>
       <div class="pr-g">${badge(H, { link:false })}<input class="inp num" type="number" min="0" max="250" inputmode="numeric" name="h_${g.id}" value="${my ? my[0] : ""}" aria-label="נקודות ${esc(tn(H))}"><span>:</span><input class="inp num" type="number" min="0" max="250" inputmode="numeric" name="a_${g.id}" value="${my ? my[1] : ""}" aria-label="נקודות ${esc(tn(A))}">${badge(A, { link:false })}</div>
-      <details class="pr-bonus" ${my?.[2] ? "open" : ""}><summary class="small">⭐ בונוס (רשות): מי יהיה הקלע המוביל?</summary><div class="pr-bonus-r"><select class="inp" name="tp_${g.id}"><option value="">בלי</option>${plOpts}</select><input class="inp num" type="number" min="0" max="100" inputmode="numeric" name="tpp_${g.id}" placeholder="כמה נק'?" value="${my && isN(my[3]) ? my[3] : ""}"></div></details></div>`; }).join("");
+      <details class="pr-bonus" ${my && (my[2] || [4, 5, 6, 7].some(i => isN(my[i]))) ? "open" : ""}><summary class="small">⭐ בונוסים (רשות) – עוד נקודות</summary>
+        <label class="f small">הקלע המוביל במשחק – ובכמה נקודות?<div class="pr-bonus-r"><select class="inp" name="tp_${g.id}"><option value="">בלי</option>${plOpts}</select><input class="inp num" type="number" min="0" max="100" inputmode="numeric" name="tpp_${g.id}" placeholder="כמה נק'?" value="${my && isN(my[3]) ? my[3] : ""}"></div></label>
+        <div class="pr-bonus-g">
+          <label class="f small">מי מובילה במחצית?<select class="inp" name="hf_${g.id}">${pick2(my?.[4])}</select></label>
+          <label class="f small">מי מנצחת ברבע 1?<select class="inp" name="q1_${g.id}">${pick2(my?.[5])}</select></label>
+          <label class="f small">כמה שלשות במשחק?<input class="inp num" type="number" min="0" max="80" inputmode="numeric" name="t3_${g.id}" value="${my && isN(my[6]) ? my[6] : ""}"></label>
+          <label class="f small">הרבע עם הכי הרבה נקודות?<select class="inp" name="bq_${g.id}"><option value="">בלי</option>${[1, 2, 3, 4].map(q => `<option value="${q}" ${my?.[7] === q ? "selected" : ""}>רבע ${q}</option>`).join("")}</select></label>
+        </div></details></div>`; }).join("");
   const tbl = predTable();
   const mine = sortedGames().filter(g => PRED.preds[g.id]?.[myId] && gameLockedLocal(g)).reverse().slice(0, 10);
-  return `<section class="sec"><div class="sec-h"><h2>🎯 המשחקים הבאים</h2><span class="small muted">${esc(chatName())}</span></div>
-    ${up.length ? `<form class="card pad" data-form="predSave">${rows}<button class="btn pri" style="margin-top:12px;width:100%">שמור ניחושים</button></form>` : `<div class="card pad muted">אין כרגע משחקים פתוחים לניחוש.</div>`}
-    <details class="card pad sec pr-rules"><summary><b>📋 איך מקבלים נקודות?</b></summary><table class="pr-rules-t">${PRED_RULES.map(([l, n]) => `<tr><td>${esc(l)}</td><td class="num"><b>${esc(n)}</b></td></tr>`).join("")}</table>
-      <p class="small muted">מקסימום 13 נקודות על התוצאה, ועוד עד 6 על הבונוס. אפשר לשנות ניחוש עד שהמשחק מתחיל.</p></details></section>
+  return `<section class="sec"><div class="sec-h"><h2>🎯 משחקים ב-10 הימים הקרובים</h2><span class="small muted">${esc(chatName())}</span></div>
+    ${up.length ? `<form class="card pad" data-form="predSave">${rows}<button class="btn pri" style="margin-top:12px;width:100%">שמור ניחושים</button></form>` : `<div class="card pad muted">אין משחקים ב-10 הימים הקרובים. אפשר לנחש משחק עד 10 ימים לפני שהוא מתחיל.</div>`}
+    <details class="card pad sec pr-rules"><summary><b>📋 איך מקבלים נקודות?</b></summary><div class="pr-rules-g">${PRED_RULES.map(([l, n]) => `<div><span>${esc(l)}</span><b dir="ltr">+${esc(n)}</b></div>`).join("")}</div>
+      <p class="small muted">⭐ = רשות. מנחשים עד 10 ימים לפני, ומשנים עד שהמשחק מתחיל.</p></details></section>
   <section class="sec"><div class="sec-h"><h2>🏆 טבלת המנחשים</h2></div>${tbl.length ? `<div class="tbl-wrap card"><table><thead><tr><th>#</th><th class="l">שם</th><th>נק'</th><th>ניחושים</th><th>מדויקים</th></tr></thead><tbody>${tbl.map((r, i) => `<tr class="${r.uid === myId ? "mine" : ""}"><td>${i + 1}</td><td class="l">${esc(r.nm)}</td><td><b>${r.pts}</b></td><td>${r.n}</td><td>${r.exact}</td></tr>`).join("")}</tbody></table></div>` : `<div class="card pad muted">הטבלה תתמלא אחרי המשחקים הראשונים שניחשו עליהם.</div>`}</section>
   ${mine.length ? `<section class="sec"><div class="sec-h"><h2>הניחושים שלי</h2></div><div class="card pl-list">${mine.map(g => { const x = PRED.preds[g.id][myId], fin = isFinal(g), pts = fin ? predPts(x, g) : null;
       const sc = fin ? predScore(x, g) : null, tpP = x[2] && player(x[2]);
-      return `<a class="pl-row" href="#/game/${g.id}"><span class="who"><b>${esc(tn(team(g.homeId)))} – ${esc(tn(team(g.awayId)))}</b><small>ניחשת ${x[0]}-${x[1]}${tpP ? ` · ⭐ ${esc(tpP.name)}${isN(x[3]) ? ` ${x[3]} נק'` : ""}` : ""}${fin ? ` · יצא ${g.homeScore}-${g.awayScore}` : " · ממתין לתוצאה"}</small>${sc?.parts.length ? `<small class="pr-parts">${sc.parts.map(([l, n]) => `${esc(l)} +${n}`).join(" · ")}</small>` : ""}</span>${fin ? `<b class="${sc.pts ? "pos" : ""}">${sc.pts} נק'</b>` : ""}</a>`; }).join("")}</div></section>` : ""}`;
+      return `<a class="pl-row" href="#/game/${g.id}"><span class="who"><b>${esc(tn(team(g.homeId)))} – ${esc(tn(team(g.awayId)))}</b><small>ניחשת ${x[0]}-${x[1]}${tpP ? ` · ⭐ ${esc(tpP.name)}${isN(x[3]) ? ` ${x[3]} נק'` : ""}` : ""}${fin ? ` · יצא ${g.homeScore}-${g.awayScore}` : " · ממתין לתוצאה"}</small>${sc?.parts.length ? `<small class="pr-parts">${sc.parts.map(([l, n]) => `${esc(l)} <bdi dir="ltr">+${n}</bdi>`).join(" · ")}</small>` : ""}</span>${fin ? `<b class="${sc.pts ? "pos" : ""}">${sc.pts} נק'</b>` : ""}</a>`; }).join("")}</div></section>` : ""}`;
 }
 
 /* ================= לוח אימונים (רק לקבוצה) ================= */
@@ -3592,7 +3635,7 @@ Object.assign(FORMS, {
       toast(res.ok ? "הקודים נשמרו ✓" : res.error === "same-code" ? "הקוד לא יכול להיות כמו קוד אחר או כמו הסיסמה שלך" : "לא נשמר"); } catch { toast("אין חיבור"); }
   },
   async pollNew(f) {
-    const opts = [0,1,2,3,4,5].map(i => f["o" + i].value.trim()).filter(Boolean);
+    const opts = [...f.querySelectorAll("input[name=opt]")].map(x => x.value.trim()).filter(Boolean);
     const today = new Date().toLocaleDateString("en-CA");
     const ts = (d, t) => (d || t) ? new Date(`${d || today}T${t || "00:00"}`).getTime() : 0;
     const start = ts(f.start_d.value, f.start_t.value), end = ts(f.end_d.value, f.end_t.value);
@@ -3600,16 +3643,18 @@ Object.assign(FORMS, {
     if (opts.length < 2) return toast("צריך לפחות 2 תשובות");
     if (end && end <= (start || Date.now())) return toast("זמן הסגירה צריך להיות אחרי הפתיחה");
     const res = await chatApi("POST", "/polls", { body:{ q:f.q.value.trim(), opts, start, end, roles } });
-    if (!chatRes(res)) return; toast(start > Date.now() ? "הסקר מתוזמן ⏰" : "הסקר פורסם ✓"); f.reset(); f.closest("details").open = false; POLLS.loaded = false; pollsLoad();
+    if (!chatRes(res)) return; toast(start > Date.now() ? "הסקר מתוזמן ⏰" : "הסקר פורסם ✓"); f.reset(); $("#pollOpts").innerHTML = [0, 1].map(pollOptRow).join(""); pollOptCount(); f.closest("details").open = false; POLLS.loaded = false; pollsLoad();
   },
   async predSave(f) {
+    const v = (k, id) => { const el = f[k + "_" + id]; return el && el.value !== "" ? +el.value : ""; };
     const picks = sortedGames().filter(g => f["h_" + g.id] && f["h_" + g.id].value !== "" && f["a_" + g.id].value !== "").map(g => ({ gid:g.id, h:+f["h_" + g.id].value, a:+f["a_" + g.id].value,
-      tp:f["tp_" + g.id]?.value || "", tpp:f["tp_" + g.id]?.value && f["tpp_" + g.id].value !== "" ? +f["tpp_" + g.id].value : "" }));
+      tp:f["tp_" + g.id]?.value || "", tpp:f["tp_" + g.id]?.value ? v("tpp", g.id) : "", hf:v("hf", g.id), q1:v("q1", g.id), t3:v("t3", g.id), bq:v("bq", g.id) }));
     if (!picks.length) return toast("לא מילאת אף ניחוש");
     const res = await chatApi("POST", "/predict", { body:{ picks } });
     if (res.error === "closed") return toast("המשחקים כבר התחילו – אי אפשר לנחש");
     if (!chatRes(res)) return;
-    const myId = CHAT.user?.id || "admin"; for (const x of picks) (PRED.preds[x.gid] ||= {})[myId] = x.tp ? [x.h, x.a, x.tp, x.tpp === "" ? null : x.tpp] : [x.h, x.a];
+    const myId = CHAT.user?.id || "admin", nn = (x) => x === "" ? null : x;
+    for (const x of picks) (PRED.preds[x.gid] ||= {})[myId] = [x.h, x.a, x.tp || null, nn(x.tpp), nn(x.hf), nn(x.q1), nn(x.t3), nn(x.bq)];
     toast(res.locked ? `נשמרו ${res.saved} ניחושים (${res.locked} משחקים כבר התחילו)` : "הניחושים נשמרו ✓"); render(true);
   },
   async trainSave(f) {
@@ -3664,6 +3709,8 @@ Object.assign(ACT, {
   },
   async pollClose(el) { const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, closeNow:true } }); if (chatRes(res)) pollsLoad(); },
   async pollDel(el) { if (!await confirmBox("למחוק את הסקר?", "הסקר והתשובות יימחקו.", "מחק", true)) return; const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, del:true } }); if (chatRes(res)) pollsLoad(); },
+  pollAddOpt() { const box = $("#pollOpts"); if (!box || box.children.length >= 32) return; box.insertAdjacentHTML("beforeend", pollOptRow(box.children.length)); pollOptCount(); box.lastElementChild.querySelector("input").focus(); },
+  pollRmOpt(el) { el.closest(".poll-opt")?.remove(); pollOptCount(); },
   trainEdit() { TRAIN.edit = !TRAIN.edit; render(true); },
   trainAdd() { $("#trRows")?.insertAdjacentHTML("beforeend", trainRow({ d:new Date().getDay() })); },
   trainRm(el) { el.closest(".tr-row")?.remove(); },
