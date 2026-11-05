@@ -647,6 +647,12 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 @media(max-width:420px){.pr-rules-g{grid-template-columns:1fr}}
 .pr-rules-g div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border-radius:9px;background:var(--card2);font-size:13px}
 .pr-rules-g b{color:var(--win);white-space:nowrap}
+.pd-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.pd-tbl th,.pd-tbl td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:center}
+.pd-tbl tbody th{text-align:start;color:var(--muted);font-weight:500;font-size:13px}
+.pd-tbl thead th{font-size:12px;color:var(--muted)}
+.pd-tbl tfoot th{text-align:start}.pd-tbl tfoot td{font-size:18px}
+.pd-head .split{align-items:center}.pd-score{font-size:26px}
 
 </style>
 </head>
@@ -1600,7 +1606,7 @@ function pageHome() {
     </div>
   </section>
   ${meHomeCard()}
-  ${(() => { const m = roundMvps()[0]; return m ? `<section class="sec">${mvpCard(m)}</section>` : ""; })()}
+  ${(() => { const m = roundMvps().find(x => x.done); return m ? `<section class="sec">${mvpCard(m)}</section>` : ""; })()}
   <div class="grid g2 sec">
     <div><div class="sec-h"><h2>טבלת הליגה</h2><a class="more" href="#/standings">לטבלה המלאה ←</a></div>${standingsTable(st, true)}</div>
     <div>
@@ -2982,30 +2988,52 @@ function gameField(el, isChange) {
 
 /* ================= שחקן המחזור ================= */
 // בכל מחזור: השחקן עם הציון הכי גבוה (בשוויון – יותר נקודות). מתעדכן לבד כשמכניסים משחקים.
-function roundMvps(games = DB.games) {
+// תאריך המחזור = התאריך שבו שוחקו רוב המשחקים שלו (משחק שנדחה לא מזיז את המחזור).
+// מחזור "נגמר" = כל המשחקים שבתאריך הזה כבר הסתיימו.
+function roundInfo(games = DB.games) {
   const by = new Map();
-  for (const g of games) {
-    if (!isFinal(g) || g.round === undefined || g.round === "") continue;
-    const k = String(g.round), cur = by.get(k) || { round:k, date:"", best:null };
-    if ((g.date || "") > cur.date) cur.date = g.date || "";
-    for (const [pid, r] of Object.entries(g.box || {})) {
-      const p = player(pid), v = rateOf(r); if (!p || !isN(v)) continue;
-      const pts = val(r, "pts") || 0;
-      if (!cur.best || v > cur.best.v || (v === cur.best.v && pts > cur.best.pts)) cur.best = { p, g, r, v, pts };
-    }
-    by.set(k, cur);
+  for (const g of games) { if (g.round === undefined || g.round === "") continue; const k = String(g.round); (by.get(k) || by.set(k, []).get(k)).push(g); }
+  const out = new Map();
+  for (const [k, gs] of by) {
+    const cnt = {}; for (const g of gs) if (g.date) cnt[g.date] = (cnt[g.date] || 0) + 1;
+    const date = Object.entries(cnt).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || "";
+    const main = gs.filter(g => g.date === date);
+    out.set(k, { round:k, date, games:gs, done:main.length > 0 && main.every(isFinal) });
   }
-  return [...by.values()].filter(x => x.best).sort((a, b) => b.date.localeCompare(a.date) || String(b.round).localeCompare(String(a.round), "he", { numeric:true }));
+  return out;
+}
+function roundMvps(games = DB.games) {
+  const res = [];
+  for (const info of roundInfo(games).values()) {
+    let best = null;
+    for (const g of info.games) { if (!isFinal(g)) continue;
+      for (const [pid, r] of Object.entries(g.box || {})) {
+        const p = player(pid), v = rateOf(r); if (!p || !isN(v)) continue;
+        const pts = val(r, "pts") || 0;
+        if (!best || v > best.v || (v === best.v && pts > best.pts)) best = { p, g, r, v, pts };
+      } }
+    if (best) res.push({ round:info.round, date:info.date, done:info.done, best });
+  }
+  // מהמחזור הכי חדש לישן – לפי תאריך המחזור
+  // מחזורים שנגמרו – מהחדש לישן; מחזורים שעוד לא נגמרו (למשל משחק שהוקדם) – בסוף
+  return res.sort((a, b) => (b.done - a.done) || (a.done ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)) || String(b.round).localeCompare(String(a.round), "he", { numeric:true }));
 }
 function mvpCard(x, big = true) {
   const { p, g, v, pts } = x.best, t = team(p.teamId), opp = team(g.homeId === p.teamId ? g.awayId : g.homeId);
   const my = g.homeId === p.teamId ? g.homeScore : g.awayScore, ot = g.homeId === p.teamId ? g.awayScore : g.homeScore;
   return `<div class="card pad mvp-card${big ? "" : " sm"}" style="--tc:${esc(t?.color || "var(--accent)")}">
-    <div class="split"><span class="mvp-k">⭐ שחקן המחזור · מחזור ${esc(x.round)}</span>${big ? `<a class="small more" href="#/leaders" data-jump="mvps">כל שחקני המחזור ←</a>` : ""}</div>
+    <div class="split"><span class="mvp-k">⭐ שחקן המחזור · מחזור ${esc(x.round)}${x.date ? ` · ${esc(fmtDM(x.date))}` : ""}${x.done ? "" : " · עוד לא נגמר"}</span>${big ? `<a class="small more" href="#/mvps">כל שחקני המחזור ←</a>` : ""}</div>
     <div class="mvp-row"><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${p.number ? esc(p.number) : "⭐"}</span>
       <div class="who"><b>${plink(p)}</b><small>${t ? badge(t) : ""}</small></div>
       <div class="mvp-v">${rtBadge(v)}<small>ציון</small></div><div class="mvp-v"><b>${pts}</b><small>נק'</small></div></div>
     <a class="small muted" href="#/game/${g.id}">${my > ot ? "ניצחון" : "הפסד"} ${my}-${ot} נגד ${esc(tn(opp) || "—")} · ${esc(fmtDM(g.date))}</a></div>`;
+}
+
+function pageMvps() {
+  const ms = roundMvps();
+  if (!ms.length) return `<h1>שחקני המחזור</h1><div class="card pad muted">עוד אין מחזורים עם נתונים.</div>`;
+  return `<h1>⭐ שחקני המחזור</h1><p class="small muted">מהמחזור הכי חדש לישן, לפי התאריך שבו שוחק רוב המחזור. משחק שנדחה נספר במחזור שלו.</p>
+    <div class="grid g3">${ms.map(m => mvpCard(m, false)).join("")}</div>`;
 }
 
 /* ================= לפני המשחק ================= */
@@ -3222,8 +3250,7 @@ async function chatAnnounce() {
       items.push({ key:"final-" + g.id + "-" + g.homeScore + "-" + g.awayScore, text:`🏀 סופי: ${tn(H)} ${g.homeScore} – ${g.awayScore} ${tn(A)}`, ref:{ t:"game", id:g.id } });
     }
     for (const x of roundMvps(V.games)) {
-      const rg = V.games.filter(g => String(g.round) === x.round);
-      if (x.date < since || !rg.every(isFinal)) continue;
+      if (!x.done || x.date < since) continue;
       const { p, v, pts } = x.best, t = team(p.teamId);
       items.push({ key:"mvp-" + x.round, text:`⭐ שחקן מחזור ${x.round}: ${p.name}${t ? ` (${tn(t)})` : ""} – ציון ${nd(v)}, ${pts} נק'`, ref:{ t:"player", id:p.id } });
     }
@@ -3446,7 +3473,8 @@ function predScore(guess, g) {
   const winOk = (h > a) === (H > A) && h !== a;
   add("מנצחת", winOk ? 3 : 0);
   add("הפרש", winOk && Math.abs((h - a) - (H - A)) <= 3 ? 2 : 0);
-  for (const [x, X] of [[h, H], [a, A]]) add(x === X ? "נקודות מדויקות" : "נקודות קרובות", x === X ? 2 : Math.abs(x - X) <= 5 ? 1 : 0);
+  // מדויק = גם "קרוב" וגם "מדויק" (1 + 2)
+  for (const [x, X] of [[h, H], [a, A]]) { add("נקודות קרובות", Math.abs(x - X) <= 5 ? 1 : 0); add("נקודות מדויקות", x === X ? 2 : 0); }
   add("סך הנקודות", Math.abs((h + a) - (H + A)) <= 5 ? 1 : 0);
   add("תוצאה מדויקת", h === H && a === A ? 3 : 0);
   add("הפרש מדויק", winOk && (h - a) === (H - A) ? 2 : 0);
@@ -3479,9 +3507,53 @@ function predTable() {
     for (const [uid, x] of Object.entries(gs)) { const r = tab[uid] ||= { uid, nm:PRED.names[uid] || (uid === "admin" ? "מנהל" : "?"), pts:0, n:0, exact:0 }; const sc = predScore(x, g); r.pts += sc.pts; r.n++; if (sc.exact) r.exact++; } }
   return Object.values(tab).sort((a, b) => b.pts - a.pts || b.exact - a.exact || a.n - b.n || a.nm.localeCompare(b.nm, "he"));
 }
-function pagePredict() {
+// מה קרה באמת במשחק – בשביל להשוות לניחוש (כולל הבונוסים)
+function predActual(g) {
+  const QH = gameQuarters(g, g.homeId), QA = gameQuarters(g, g.awayId), ts = topScorers(g);
+  const x = teamGameStats(g, g.homeId).fg3m, y = teamGameStats(g, g.awayId).fg3m;
+  const out = { ts, t3: isN(x) && isN(y) ? x + y : null, hf:null, q1:null, bq:null };
+  if (QH && QA) {
+    const hH = QH.qs[0] + QH.qs[1], hA = QA.qs[0] + QA.qs[1];
+    out.hf = hH === hA ? "שוויון" : hH > hA ? 0 : 1; out.q1 = QH.qs[0] === QA.qs[0] ? "שוויון" : QH.qs[0] > QA.qs[0] ? 0 : 1;
+    const tot = [0, 1, 2, 3].map(i => QH.qs[i] + QA.qs[i]), m = Math.max(...tot); out.bq = tot.map((v, i) => v === m ? i + 1 : 0).filter(Boolean);
+  }
+  return out;
+}
+function predDetail(g) {
+  const H = team(g.homeId), A = team(g.awayId), myId = CHAT.user?.id || "admin", my = PRED.preds[g.id]?.[myId];
+  const fin = isFinal(g), locked = gameLockedLocal(g), side = (v) => v === 0 ? tn(H) : v === 1 ? tn(A) : v ?? "—";
+  const act = fin ? predActual(g) : null, sc = fin && my ? predScore(my, g) : null;
+  const row = (l, mine, real, pts) => `<tr><th>${l}</th><td>${mine ?? "—"}</td><td>${real ?? "—"}</td>${fin ? `<td class="num">${pts ? `<b class="pos">+${pts}</b>` : "0"}</td>` : ""}</tr>`;
+  const ptsOf = (label) => sc ? (sc.parts.find(p => p[0] === label)?.[1] || 0) : 0;
+  let mineHtml = `<div class="card pad muted">לא ניחשת את המשחק הזה.</div>`;
+  if (my) {
+    const tp = my[2] && player(my[2]), tsNames = act?.ts ? act.ts.ids.map(id => player(id)?.name).filter(Boolean).join(", ") + ` (${act.ts.pts})` : null;
+    mineHtml = `<div class="card"><table class="pd-tbl"><thead><tr><th></th><th>הניחוש שלך</th><th>מה היה</th>${fin ? "<th>נק'</th>" : ""}</tr></thead><tbody>
+      ${row("תוצאה", `<b class="num" dir="ltr">${my[0]} – ${my[1]}</b>`, fin ? `<b class="num" dir="ltr">${g.homeScore} – ${g.awayScore}</b>` : "ממתין", sc ? ["מנצחת","הפרש","תוצאה מדויקת","הפרש מדויק","משחק צמוד","ניצחון ענק"].reduce((s, l) => s + ptsOf(l), 0) : 0)}
+      ${row("נקודות הקבוצות", "", "", ptsOf("נקודות קרובות") + ptsOf("נקודות מדויקות"))}
+      ${row("סך הנקודות", my[0] + my[1], fin ? g.homeScore + g.awayScore : null, ptsOf("סך הנקודות") + ptsOf("סך נקודות מדויק"))}
+      ${tp ? row("⭐ קלע מוביל", `${esc(tp.name)}${isN(my[3]) ? ` · ${my[3]} נק'` : ""}`, tsNames ? esc(tsNames) : fin ? "אין בוקס" : null, ptsOf("קלע מוביל") + ptsOf("נקודות השחקן")) : ""}
+      ${isN(my[4]) ? row("⭐ מובילה במחצית", esc(side(my[4])), act ? esc(side(act.hf)) : null, ptsOf("מובילה במחצית")) : ""}
+      ${isN(my[5]) ? row("⭐ רבע ראשון", esc(side(my[5])), act ? esc(side(act.q1)) : null, ptsOf("רבע ראשון")) : ""}
+      ${isN(my[6]) ? row("⭐ שלשות במשחק", my[6], act ? act.t3 : null, ptsOf("שלשות במשחק")) : ""}
+      ${isN(my[7]) ? row("⭐ הרבע הכי גבוה", `רבע ${my[7]}`, act?.bq ? act.bq.map(q => "רבע " + q).join(" / ") : null, ptsOf("הרבע הכי גבוה")) : ""}
+    </tbody>${sc ? `<tfoot><tr><th colspan="3">סה"כ</th><td class="num"><b>${sc.pts}</b></td></tr></tfoot>` : ""}</table></div>
+    ${sc?.parts.length ? `<p class="small muted" style="margin-top:6px">${sc.parts.map(([l, n]) => `${esc(l)} <bdi dir="ltr">+${n}</bdi>`).join(" · ")}</p>` : ""}`;
+  }
+  const all = Object.entries(PRED.preds[g.id] || {}).map(([uid, x]) => ({ uid, nm:PRED.names[uid] || "?", x, pts:fin ? predScore(x, g).pts : null }))
+    .sort((a, b) => (b.pts ?? 0) - (a.pts ?? 0) || a.nm.localeCompare(b.nm, "he"));
+  return `<p><a class="btn sm" href="#/predict">→ כל הניחושים</a></p>
+    <div class="card pad pd-head"><div class="split">${badge(H)}<b class="num pd-score" dir="ltr">${fin ? `${g.homeScore} – ${g.awayScore}` : "VS"}</b>${badge(A)}</div>
+      <div class="small muted" style="text-align:center;margin-top:6px">${g.round ? `מחזור ${esc(g.round)} · ` : ""}${esc(fmtDate(g.date, true))}${fin ? " · נגמר" : locked ? " · התחיל" : " · עוד לא התחיל"}</div></div>
+    <section class="sec"><div class="sec-h"><h2>הניחוש שלך</h2></div>${mineHtml}</section>
+    <section class="sec"><div class="sec-h"><h2>איך כולם ניחשו (${all.length})</h2></div>
+      ${!locked ? `<div class="card pad muted">הניחושים של כולם יוצגו כשהמשחק יתחיל.</div>` : all.length ? `<div class="card tbl-wrap"><table><thead><tr><th class="l">שם</th><th>ניחוש</th>${fin ? "<th>נק'</th>" : ""}</tr></thead><tbody>${all.map(r => `<tr class="${r.uid === myId ? "mine" : ""}"><td class="l">${esc(r.nm)}</td><td class="num" dir="ltr">${r.x[0]} – ${r.x[1]}</td>${fin ? `<td><b>${r.pts}</b></td>` : ""}</tr>`).join("")}</tbody></table></div>` : `<div class="card pad muted">אף אחד לא ניחש.</div>`}</section>
+    <a class="btn" href="#/game/${g.id}">לעמוד המשחק ←</a>`;
+}
+function pagePredict(q = new URLSearchParams()) {
   const gate = chatGate("ניחושים"); if (gate) return gate;
   if (!PRED.loaded) { setTimeout(predLoad); return `<div class="card pad cm-empty">טוען…</div>`; }
+  const dg = q.get("g") && game(q.get("g")); if (dg) return predDetail(dg);
   const lim = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
   const myId = CHAT.user?.id || "admin", up = sortedGames().filter(g => !gameLockedLocal(g) && (g.date || "") <= lim);
   const rows = up.map(g => { const H = team(g.homeId), A = team(g.awayId), my = PRED.preds[g.id]?.[myId];
@@ -3502,11 +3574,11 @@ function pagePredict() {
   return `<section class="sec"><div class="sec-h"><h2>🎯 משחקים ב-10 הימים הקרובים</h2><span class="small muted">${esc(chatName())}</span></div>
     ${up.length ? `<form class="card pad" data-form="predSave">${rows}<button class="btn pri" style="margin-top:12px;width:100%">שמור ניחושים</button></form>` : `<div class="card pad muted">אין משחקים ב-10 הימים הקרובים. אפשר לנחש משחק עד 10 ימים לפני שהוא מתחיל.</div>`}
     <details class="card pad sec pr-rules"><summary><b>📋 איך מקבלים נקודות?</b></summary><div class="pr-rules-g">${PRED_RULES.map(([l, n]) => `<div><span>${esc(l)}</span><b dir="ltr">+${esc(n)}</b></div>`).join("")}</div>
-      <p class="small muted">⭐ = רשות. מנחשים עד 10 ימים לפני, ומשנים עד שהמשחק מתחיל.</p></details></section>
+      <p class="small muted">מדויק = מקבלים גם על "קרוב" וגם על "מדויק" (למשל הפרש מדויק = 2+2). ⭐ = רשות. מנחשים עד 10 ימים לפני, ומשנים עד שהמשחק מתחיל.</p></details></section>
   <section class="sec"><div class="sec-h"><h2>🏆 טבלת המנחשים</h2></div>${tbl.length ? `<div class="tbl-wrap card"><table><thead><tr><th>#</th><th class="l">שם</th><th>נק'</th><th>ניחושים</th><th>מדויקים</th></tr></thead><tbody>${tbl.map((r, i) => `<tr class="${r.uid === myId ? "mine" : ""}"><td>${i + 1}</td><td class="l">${esc(r.nm)}</td><td><b>${r.pts}</b></td><td>${r.n}</td><td>${r.exact}</td></tr>`).join("")}</tbody></table></div>` : `<div class="card pad muted">הטבלה תתמלא אחרי המשחקים הראשונים שניחשו עליהם.</div>`}</section>
   ${mine.length ? `<section class="sec"><div class="sec-h"><h2>הניחושים שלי</h2></div><div class="card pl-list">${mine.map(g => { const x = PRED.preds[g.id][myId], fin = isFinal(g), pts = fin ? predPts(x, g) : null;
       const sc = fin ? predScore(x, g) : null, tpP = x[2] && player(x[2]);
-      return `<a class="pl-row" href="#/game/${g.id}"><span class="who"><b>${esc(tn(team(g.homeId)))} – ${esc(tn(team(g.awayId)))}</b><small>ניחשת ${x[0]}-${x[1]}${tpP ? ` · ⭐ ${esc(tpP.name)}${isN(x[3]) ? ` ${x[3]} נק'` : ""}` : ""}${fin ? ` · יצא ${g.homeScore}-${g.awayScore}` : " · ממתין לתוצאה"}</small>${sc?.parts.length ? `<small class="pr-parts">${sc.parts.map(([l, n]) => `${esc(l)} <bdi dir="ltr">+${n}</bdi>`).join(" · ")}</small>` : ""}</span>${fin ? `<b class="${sc.pts ? "pos" : ""}">${sc.pts} נק'</b>` : ""}</a>`; }).join("")}</div></section>` : ""}`;
+      return `<a class="pl-row" href="#/predict?g=${g.id}"><span class="who"><b>${esc(tn(team(g.homeId)))} – ${esc(tn(team(g.awayId)))}</b><small>ניחשת ${x[0]}-${x[1]}${tpP ? ` · ⭐ ${esc(tpP.name)}${isN(x[3]) ? ` ${x[3]} נק'` : ""}` : ""}${fin ? ` · יצא ${g.homeScore}-${g.awayScore}` : " · ממתין לתוצאה"}</small>${sc?.parts.length ? `<small class="pr-parts">${sc.parts.map(([l, n]) => `${esc(l)} <bdi dir="ltr">+${n}</bdi>`).join(" · ")}</small>` : ""}</span>${fin ? `<b class="${sc.pts ? "pos" : ""}">${sc.pts} נק'</b>` : ""}</a>`; }).join("")}</div></section>` : ""}`;
 }
 
 /* ================= לוח אימונים (רק לקבוצה) ================= */
@@ -3743,7 +3815,7 @@ function navList() {
 // 6 לשוניות ראשיות, ובתוך חלק מהן לשוניות קטנות
 const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"]], players:[["players","שחקנים"],["leaders","מובילים"],["compare","השוואה"]],
   myteam:[["myteam","סטטיסטיקה"],["training","אימונים"]], chat:[["chat","צ'אט"],["polls","סקרים"],["predict","ניחושים"],["people","אנשים", "mod"]] };
-const NAV_OF = { teams:"standings", leaders:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
+const NAV_OF = { teams:"standings", leaders:"players", mvps:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
 function render(keepFocus) {
   const hash = ROUTE.replace(/^#\/?/, "");
   const [pathPart] = hash.split("?"); const parts = pathPart.split("/").filter(Boolean); const q = qs();
@@ -3770,7 +3842,8 @@ function render(keepFocus) {
   else if (page === "teams") html = pageTeams();
   else if (page === "compare") html = pageCompare(q);
   else if (page === "polls") html = pagePolls();
-  else if (page === "predict") html = pagePredict();
+  else if (page === "predict") html = pagePredict(q);
+  else if (page === "mvps") html = pageMvps();
   else if (page === "training") html = pageTraining();
   else if (page === "chat") html = pageChat(q);
   else if (page === "people") html = pagePeople();
