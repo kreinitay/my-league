@@ -35,7 +35,7 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45;
   min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
-  background:radial-gradient(700px 380px at 85% -80px,rgba(255,122,26,.16),transparent 70%),
+  background:radial-gradient(700px 380px at 85% -80px,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%),
              radial-gradient(600px 400px at -10% 10%,rgba(90,167,255,.10),transparent 70%)}
 a{color:inherit;text-decoration:none}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -83,7 +83,7 @@ h2{font-size:17px;margin:0;letter-spacing:-.01em}
 .pad{padding:14px 16px}
 .hero{padding:20px;border-radius:22px;background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid var(--line);position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;inset-inline-start:-60px;bottom:-90px;width:240px;height:240px;border-radius:50%;
-  border:34px solid rgba(255,122,26,.12)}
+  border:34px solid color-mix(in srgb,var(--accent) 12%,transparent)}
 .hero h1{margin:0 0 4px;font-size:26px}
 .kpis{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px}
 .kpi b{display:block;font-size:22px}
@@ -653,6 +653,123 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .pd-tbl thead th{font-size:12px;color:var(--muted)}
 .pd-tbl tfoot th{text-align:start}.pd-tbl tfoot td{font-size:18px}
 .pd-head .split{align-items:center}.pd-score{font-size:26px}
+
+.ball circle:first-child{fill:var(--accent)}
+.look-h{font-size:13px;color:var(--muted);margin:12px 0 6px}
+.sw-row{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.sw{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:11px;color:var(--muted)}
+.sw i{width:34px;height:34px;border-radius:50%;display:block;box-shadow:0 0 0 1px rgba(127,127,127,.4);border:3px solid var(--bg)}
+.sw.on i{box-shadow:0 0 0 2px var(--text)}.sw.on{color:var(--text);font-weight:600}
+.st-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px}
+.st{padding:8px;border:2px solid var(--line);border-radius:10px;background:var(--card2);cursor:pointer;font:inherit;font-size:14px;color:var(--text)}
+.st.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.mode-row{display:flex;gap:8px}.mode-row .btn{flex:1}.mode-row .btn.on{border-color:var(--accent);color:var(--accent)}
+
+
+/* =====================================================================
+   מראה האתר = צבע (6) × עיצוב (4). כל עיצוב עובד עם כל צבע.
+   ===================================================================== */
+
+/* ---------- צבעים (1 כתום = ברירת המחדל למעלה) ---------- */
+:root[data-palette="purple"]:not([data-theme="light"]){--bg:#07050d;--bg2:#0d0918;--card:#150f24;--card2:#1d1532;--line:#33265a;--text:#f4efff;--muted:#ab9fd0;--dim:#6e6496;--accent:#b36bff;--accent2:#d6b3ff;--accent-ink:#12051f}
+:root[data-palette="purple"][data-theme="light"]{--bg:#f4f0fd;--bg2:#ebe4fb;--card:#ffffff;--card2:#f5f1fe;--line:#ddd2f6;--text:#1b1033;--muted:#6a5c92;--dim:#9a8fbd;--accent:#7c3aed;--accent2:#a678f5;--accent-ink:#ffffff}
+:root[data-palette="mono"]:not([data-theme="light"]){--bg:#000000;--bg2:#0c0c0c;--card:#121212;--card2:#1b1b1b;--line:#2f2f2f;--text:#f7f7f7;--muted:#a8a8a8;--dim:#6d6d6d;--accent:#ffffff;--accent2:#d4d4d4;--accent-ink:#000000;--blue:#d4d4d4}
+:root[data-palette="mono"][data-theme="light"]{--bg:#f5f5f5;--bg2:#ebebeb;--card:#ffffff;--card2:#f4f4f4;--line:#d9d9d9;--text:#0d0d0d;--muted:#555555;--dim:#8f8f8f;--accent:#0d0d0d;--accent2:#3d3d3d;--accent-ink:#ffffff;--blue:#333333}
+:root[data-palette="red"]:not([data-theme="light"]){--bg:#0b0808;--bg2:#120c0c;--card:#171010;--card2:#211616;--line:#3a2323;--text:#fff4f2;--muted:#c9a7a3;--dim:#8a6762;--accent:#ff2d3a;--accent2:#ff6b74;--accent-ink:#ffffff;--loss:#ff8a8a}
+:root[data-palette="red"][data-theme="light"]{--bg:#f7f3f2;--bg2:#efe6e4;--card:#ffffff;--card2:#faf3f2;--line:#ead6d3;--text:#170b0b;--muted:#6f504c;--dim:#a68783;--accent:#d90f1c;--accent2:#ef4d57;--accent-ink:#ffffff;--loss:#b91c1c}
+:root[data-palette="blue"]:not([data-theme="light"]){--bg:#04112a;--bg2:#071937;--card:#0b1f44;--card2:#102a57;--line:#1d3a6e;--text:#eef5ff;--muted:#9fb6dd;--dim:#5e78a6;--accent:#3ea0ff;--accent2:#8cc8ff;--accent-ink:#021024}
+:root[data-palette="blue"][data-theme="light"]{--bg:#f1f6ff;--bg2:#e4eefc;--card:#ffffff;--card2:#f3f8ff;--line:#d3e2f7;--text:#0a1f45;--muted:#4c6690;--dim:#8aa0c4;--accent:#0b5ed7;--accent2:#4d8fe8;--accent-ink:#ffffff}
+:root[data-palette="green"]:not([data-theme="light"]){--bg:#06120c;--bg2:#091a11;--card:#0d2318;--card2:#123020;--line:#1e4430;--text:#effaf3;--muted:#a1c4ae;--dim:#62866f;--accent:#f5c542;--accent2:#ffdc7a;--accent-ink:#1a1300}
+:root[data-palette="green"][data-theme="light"]{--bg:#f2f8f3;--bg2:#e5f0e8;--card:#ffffff;--card2:#f3f9f4;--line:#d2e6d8;--text:#0c2a1a;--muted:#4b6e58;--dim:#89a794;--accent:#0f7a43;--accent2:#3fa36c;--accent-ink:#ffffff}
+/* הכרטיס האישי/המצטיין: בצבע הנבחר (המספר על החולצה נשאר בצבע הקבוצה) */
+:root:not([data-palette="orange"]) :is(.mvp-card,.me-card){border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 13%,var(--card)),var(--card))}
+
+/* ---------- דוגמה · לוח טקטיקה: קווים מקווקווים, ציור תרגיל ברקע, כתב יד ---------- */
+:root[data-style="chalk"] body::before{background:var(--text);opacity:.07;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22360%22%20height%3D%22300%22%20viewBox%3D%220%200%20360%20300%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%3E%0A%3Ccircle%20cx%3D%2260%22%20cy%3D%2270%22%20r%3D%2214%22/%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2260%22%20r%3D%2214%22/%3E%3Ccircle%20cx%3D%22170%22%20cy%3D%22200%22%20r%3D%2214%22/%3E%0A%3Cpath%20d%3D%22M290%20170l20%2020M310%20170l-20%2020M90%20230l20%2020M110%20230l-20%2020M200%20110l18%2018M218%20110l-18%2018%22/%3E%0A%3Cpath%20d%3D%22M74%2082c40%2040%2070%2080%2090%20104%22%20stroke-dasharray%3D%228%209%22/%3E%3Cpath%20d%3D%22M158%20182l8%206-2-10%22/%3E%0A%3Cpath%20d%3D%22M250%2076c-10%2050-40%2080-70%20112%22/%3E%3Cpath%20d%3D%22M186%20182l-8%208%2010-2%22/%3E%0A%3Cpath%20d%3D%22M20%20290a160%20160%200%200%201%20320%200%22%20stroke-dasharray%3D%222%2010%22/%3E%3C/svg%3E") center/360px 300px repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22360%22%20height%3D%22300%22%20viewBox%3D%220%200%20360%20300%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%3E%0A%3Ccircle%20cx%3D%2260%22%20cy%3D%2270%22%20r%3D%2214%22/%3E%3Ccircle%20cx%3D%22250%22%20cy%3D%2260%22%20r%3D%2214%22/%3E%3Ccircle%20cx%3D%22170%22%20cy%3D%22200%22%20r%3D%2214%22/%3E%0A%3Cpath%20d%3D%22M290%20170l20%2020M310%20170l-20%2020M90%20230l20%2020M110%20230l-20%2020M200%20110l18%2018M218%20110l-18%2018%22/%3E%0A%3Cpath%20d%3D%22M74%2082c40%2040%2070%2080%2090%20104%22%20stroke-dasharray%3D%228%209%22/%3E%3Cpath%20d%3D%22M158%20182l8%206-2-10%22/%3E%0A%3Cpath%20d%3D%22M250%2076c-10%2050-40%2080-70%20112%22/%3E%3Cpath%20d%3D%22M186%20182l-8%208%2010-2%22/%3E%0A%3Cpath%20d%3D%22M20%20290a160%20160%200%200%201%20320%200%22%20stroke-dasharray%3D%222%2010%22/%3E%3C/svg%3E") center/360px 300px repeat}
+:root[data-style="chalk"] h1,:root[data-style="chalk"] h2,:root[data-style="chalk"] .brand b{font-family:"Amatic SC",var(--font);font-weight:700;letter-spacing:.02em}
+:root[data-style="chalk"] h1{font-size:40px;line-height:1}:root[data-style="chalk"] .hero h1{font-size:36px}
+:root[data-style="chalk"] h2{font-size:27px;line-height:1.05}
+:root[data-style="chalk"] :is(.card,.hero,.mvp-card,.me-card){border:2px dashed color-mix(in srgb,var(--text) 35%,transparent);border-radius:6px;box-shadow:none;background:color-mix(in srgb,var(--card) 55%,transparent)}
+:root[data-style="chalk"] .btn{border-radius:6px;border-width:2px}
+:root[data-style="chalk"] .subtabs{border:2px solid color-mix(in srgb,var(--text) 30%,transparent);border-radius:6px}
+:root[data-style="chalk"] :is(.subtabs a.on,.tabs .on){border-radius:4px}
+:root[data-style="chalk"] :is(.bnav,.top){border-color:transparent;border-style:dashed;border-width:0}
+:root[data-style="chalk"] .bnav{border-top:2px dashed color-mix(in srgb,var(--text) 30%,transparent)}
+:root[data-style="chalk"] .top{border-bottom:2px dashed color-mix(in srgb,var(--text) 30%,transparent)}
+:root[data-style="chalk"] .bnav a.on{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+
+/* ---------- דוגמה · גופייה: פסים באלכסון, פינות חדות, כותרות נטויות ---------- */
+:root[data-style="jersey"] body::before{background:
+  repeating-linear-gradient(-58deg,transparent 0 46px,color-mix(in srgb,var(--accent) 6%,transparent) 46px 52px,transparent 52px 64px,color-mix(in srgb,var(--accent) 3%,transparent) 64px 66px),
+  linear-gradient(180deg,color-mix(in srgb,var(--accent) 10%,transparent),transparent 280px)}
+:root[data-style="jersey"] .top{border-bottom:0;box-shadow:none}
+:root[data-style="jersey"] .top::after{content:"";position:absolute;inset-inline:0;bottom:-6px;height:6px;
+  background:repeating-linear-gradient(-58deg,var(--accent) 0 10px,var(--text) 10px 13px,var(--accent) 13px 16px,var(--bg) 16px 24px)}
+:root[data-style="jersey"] h1,:root[data-style="jersey"] h2,:root[data-style="jersey"] .brand b{font-family:"Karantina",var(--font);font-weight:700;letter-spacing:.01em}
+:root[data-style="jersey"] h1{font-size:44px;line-height:.95;transform:skewX(-7deg);transform-origin:right bottom}
+:root[data-style="jersey"] .hero h1{font-size:36px;transform:skewX(-5deg)}
+:root[data-style="jersey"] h2{font-size:28px;line-height:1}
+:root[data-style="jersey"] :is(.card,.hero){border-radius:4px;border-inline-start:5px solid var(--accent)}
+:root[data-style="jersey"] .hero{background:linear-gradient(115deg,color-mix(in srgb,var(--accent) 18%,var(--card)) 0 38%,var(--card) 38.2%)}
+:root[data-style="jersey"] :is(.btn,.chip,.subtabs,.subtabs a,.tabs a,.tabs button,.iconbtn){border-radius:3px}
+:root[data-style="jersey"] .btn.pri{box-shadow:3px 3px 0 var(--text)}
+:root[data-style="jersey"] .bnav a.on{background:var(--accent);color:var(--accent-ink);border-radius:3px}
+
+/* ---------- דוגמה · מגרש רחוב: אספלט, כתב ספריי, צל מוזז ---------- */
+:root[data-style="street"] body::before{background:
+  radial-gradient(color-mix(in srgb,var(--text) 9%,transparent) 1px,transparent 1.3px) 0 0/7px 7px,
+  radial-gradient(color-mix(in srgb,var(--text) 6%,transparent) 1px,transparent 1.3px) 3px 4px/11px 11px,
+  radial-gradient(600px 300px at 90% 0,color-mix(in srgb,var(--accent) 16%,transparent),transparent 70%)}
+:root[data-style="street"] h1,:root[data-style="street"] h2,:root[data-style="street"] .brand b{font-family:"Rubik Dirt",var(--font);font-weight:400;letter-spacing:.01em}
+:root[data-style="street"] h1{font-size:28px}:root[data-style="street"] .hero h1{font-size:21px}
+:root[data-style="street"] h2{font-size:20px}
+:root[data-style="street"] :is(.card,.hero){border-radius:8px;border:2px solid var(--text);box-shadow:5px 5px 0 var(--accent)}
+:root[data-style="street"] .hero{transform:rotate(-.6deg)}
+:root[data-style="street"] .btn{border-radius:8px;border-width:2px}
+:root[data-style="street"] .btn.pri{box-shadow:3px 3px 0 var(--text)}
+:root[data-style="street"] .bnav a.on{color:var(--accent);transform:rotate(-3deg) scale(1.06)}
+:root[data-style="street"] .top{border-bottom:2px solid var(--text)}
+
+/* =========== ציורי רקע (סצנה שלמה מאחורי האתר) =========== */
+:root[data-style="court"] body::after,:root[data-style="hoop"] body::after,:root[data-style="arena"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1}
+
+/* ציור · מגרש: פרקט עם כל קווי המגרש וצבע ברחבות */
+:root[data-style="court"] body{background:
+  repeating-linear-gradient(90deg,color-mix(in srgb,var(--text) 4%,transparent) 0 1px,transparent 1px 30px,color-mix(in srgb,var(--text) 2.5%,transparent) 30px 31px,transparent 31px 63px),
+  linear-gradient(color-mix(in srgb,#c8843f 10%,var(--bg)),color-mix(in srgb,#c8843f 6%,var(--bg))) fixed}
+:root[data-style="court"] body::before{background:var(--text);opacity:.24;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20860%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%3E%20%3Crect%20x%3D%2220%22%20y%3D%2220%22%20width%3D%22360%22%20height%3D%22820%22/%3E%3Cpath%20d%3D%22M20%20430h360%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2255%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2216%22/%3E%20%3Crect%20x%3D%22130%22%20y%3D%2220%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Cpath%20d%3D%22M145%20190a55%2055%200%200%200%20110%200%22/%3E%3Cpath%20d%3D%22M145%20190a55%2055%200%200%201%20110%200%22%20stroke-dasharray%3D%228%208%22/%3E%20%3Cpath%20d%3D%22M45%2020v90M355%2020v90M45%20110A163%20163%200%200%200%20355%20110%22/%3E%3Cpath%20d%3D%22M170%2048h60%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%2262%22%20r%3D%229%22/%3E%20%3Cpath%20d%3D%22M130%2070h-10M130%20105h-10M130%20140h-10M270%2070h10M270%20105h10M270%20140h10%22/%3E%20%3Crect%20x%3D%22130%22%20y%3D%22670%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Cpath%20d%3D%22M145%20670a55%2055%200%200%201%20110%200%22/%3E%3Cpath%20d%3D%22M145%20670a55%2055%200%200%200%20110%200%22%20stroke-dasharray%3D%228%208%22/%3E%20%3Cpath%20d%3D%22M45%20840v-90M355%20840v-90M45%20750A163%20163%200%200%201%20355%20750%22/%3E%3Cpath%20d%3D%22M170%20812h60%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22798%22%20r%3D%229%22/%3E%20%3Cpath%20d%3D%22M130%20790h-10M130%20755h-10M130%20720h-10M270%20790h10M270%20755h10M270%20720h10%22/%3E%3C/svg%3E") center/cover no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20860%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%3E%20%3Crect%20x%3D%2220%22%20y%3D%2220%22%20width%3D%22360%22%20height%3D%22820%22/%3E%3Cpath%20d%3D%22M20%20430h360%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2255%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2216%22/%3E%20%3Crect%20x%3D%22130%22%20y%3D%2220%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Cpath%20d%3D%22M145%20190a55%2055%200%200%200%20110%200%22/%3E%3Cpath%20d%3D%22M145%20190a55%2055%200%200%201%20110%200%22%20stroke-dasharray%3D%228%208%22/%3E%20%3Cpath%20d%3D%22M45%2020v90M355%2020v90M45%20110A163%20163%200%200%200%20355%20110%22/%3E%3Cpath%20d%3D%22M170%2048h60%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%2262%22%20r%3D%229%22/%3E%20%3Cpath%20d%3D%22M130%2070h-10M130%20105h-10M130%20140h-10M270%2070h10M270%20105h10M270%20140h10%22/%3E%20%3Crect%20x%3D%22130%22%20y%3D%22670%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Cpath%20d%3D%22M145%20670a55%2055%200%200%201%20110%200%22/%3E%3Cpath%20d%3D%22M145%20670a55%2055%200%200%200%20110%200%22%20stroke-dasharray%3D%228%208%22/%3E%20%3Cpath%20d%3D%22M45%20840v-90M355%20840v-90M45%20750A163%20163%200%200%201%20355%20750%22/%3E%3Cpath%20d%3D%22M170%20812h60%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22798%22%20r%3D%229%22/%3E%20%3Cpath%20d%3D%22M130%20790h-10M130%20755h-10M130%20720h-10M270%20790h10M270%20755h10M270%20720h10%22/%3E%3C/svg%3E") center/cover no-repeat}
+:root[data-style="court"] body::after{background:var(--accent);opacity:.16;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20860%22%3E%3Crect%20x%3D%22130%22%20y%3D%2220%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Crect%20x%3D%22130%22%20y%3D%22670%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2255%22/%3E%3C/svg%3E") center/cover no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20860%22%3E%3Crect%20x%3D%22130%22%20y%3D%2220%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Crect%20x%3D%22130%22%20y%3D%22670%22%20width%3D%22140%22%20height%3D%22170%22/%3E%3Ccircle%20cx%3D%22200%22%20cy%3D%22430%22%20r%3D%2255%22/%3E%3C/svg%3E") center/cover no-repeat}
+:root[data-style="court"] h1,:root[data-style="court"] h2,:root[data-style="court"] .brand b{font-family:"Suez One",var(--font);font-weight:400;letter-spacing:0}
+:root[data-style="court"] h1{font-size:27px}:root[data-style="court"] .hero h1{font-size:24px}
+:root[data-style="court"] :is(.card,.hero){border-radius:14px;border-top:3px solid var(--accent);background:color-mix(in srgb,var(--card) 76%,transparent)}
+:root[data-style="court"] .bnav a.on{background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:10px}
+:root[data-style="court"] .top{border-bottom:3px solid var(--accent)}
+
+/* ציור · ארנה: קהל ביציע, זרקורים, ריצפה בפרספקטיבה */
+:root[data-style="arena"] body::before{background:
+  linear-gradient(to bottom,transparent 0 62%,color-mix(in srgb,var(--accent) 8%,transparent)),
+  url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22420%22%20height%3D%22150%22%20viewBox%3D%220%200%20420%20150%22%20fill%3D%22rgba%28127%2C127%2C127%2C.34%29%22%3E%3Ccircle%20cx%3D%22-10%22%20cy%3D%2230%22%20r%3D%225.5%22/%3E%3Cpath%20d%3D%22M-20%2049q10%20-16%2020%200z%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2230%22%20r%3D%225.7%22/%3E%3Cpath%20d%3D%22M4%2049q10%20-17%2021%200z%22/%3E%3Ccircle%20cx%3D%2240%22%20cy%3D%2230%22%20r%3D%225.2%22/%3E%3Cpath%20d%3D%22M30%2049q10%20-15%2019%200z%22/%3E%3Ccircle%20cx%3D%2267%22%20cy%3D%2228%22%20r%3D%226.5%22/%3E%3Cpath%20d%3D%22M55%2051q12%20-19%2024%200z%22/%3E%3Ccircle%20cx%3D%2296%22%20cy%3D%2229%22%20r%3D%226.3%22/%3E%3Cpath%20d%3D%22M84%2050q11%20-18%2023%200z%22/%3E%3Ccircle%20cx%3D%22121%22%20cy%3D%2229%22%20r%3D%226.0%22/%3E%3Cpath%20d%3D%22M110%2050q11%20-17%2022%200z%22/%3E%3Ccircle%20cx%3D%22147%22%20cy%3D%2230%22%20r%3D%225.4%22/%3E%3Cpath%20d%3D%22M137%2049q10%20-16%2020%200z%22/%3E%3Ccircle%20cx%3D%22172%22%20cy%3D%2230%22%20r%3D%225.5%22/%3E%3Cpath%20d%3D%22M162%2049q10%20-16%2020%200z%22/%3E%3Ccircle%20cx%3D%22202%22%20cy%3D%2228%22%20r%3D%226.4%22/%3E%3Cpath%20d%3D%22M190%2050q12%20-19%2023%200z%22/%3E%3Ccircle%20cx%3D%22231%22%20cy%3D%2228%22%20r%3D%226.4%22/%3E%3Cpath%20d%3D%22M219%2050q12%20-18%2023%200z%22/%3E%3Ccircle%20cx%3D%22256%22%20cy%3D%2230%22%20r%3D%225.6%22/%3E%3Cpath%20d%3D%22M246%2049q10%20-16%2020%200z%22/%3E%3Ccircle%20cx%3D%22284%22%20cy%3D%2229%22%20r%3D%226.2%22/%3E%3Cpath%20d%3D%22M273%2050q11%20-18%2023%200z%22/%3E%3Ccircle%20cx%3D%22313%22%20cy%3D%2228%22%20r%3D%226.5%22/%3E%3Cpath%20d%3D%22M301%2051q12%20-19%2024%200z%22/%3E%3Ccircle%20cx%3D%22338%22%20cy%3D%2229%22%20r%3D%226.1%22/%3E%3Cpath%20d%3D%22M327%2050q11%20-18%2022%200z%22/%3E%3Ccircle%20cx%3D%22366%22%20cy%3D%2229%22%20r%3D%225.9%22/%3E%3Cpath%20d%3D%22M355%2050q11%20-17%2021%200z%22/%3E%3Ccircle%20cx%3D%22391%22%20cy%3D%2229%22%20r%3D%225.9%22/%3E%3Cpath%20d%3D%22M381%2050q11%20-17%2021%200z%22/%3E%3Ccircle%20cx%3D%22416%22%20cy%3D%2228%22%20r%3D%226.6%22/%3E%3Cpath%20d%3D%22M404%2051q12%20-19%2024%200z%22/%3E%3Ccircle%20cx%3D%223%22%20cy%3D%2267%22%20r%3D%227.1%22/%3E%3Cpath%20d%3D%22M-10%2092q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%2233%22%20cy%3D%2266%22%20r%3D%227.7%22/%3E%3Cpath%20d%3D%22M19%2093q14%20-22%2028%200z%22/%3E%3Ccircle%20cx%3D%2265%22%20cy%3D%2266%22%20r%3D%227.7%22/%3E%3Cpath%20d%3D%22M52%2093q14%20-22%2028%200z%22/%3E%3Ccircle%20cx%3D%2299%22%20cy%3D%2267%22%20r%3D%227.0%22/%3E%3Cpath%20d%3D%22M86%2091q13%20-20%2025%200z%22/%3E%3Ccircle%20cx%3D%22130%22%20cy%3D%2267%22%20r%3D%227.1%22/%3E%3Cpath%20d%3D%22M117%2092q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%22161%22%20cy%3D%2268%22%20r%3D%226.4%22/%3E%3Cpath%20d%3D%22M150%2090q12%20-19%2023%200z%22/%3E%3Ccircle%20cx%3D%22192%22%20cy%3D%2266%22%20r%3D%227.5%22/%3E%3Cpath%20d%3D%22M178%2092q14%20-22%2027%200z%22/%3E%3Ccircle%20cx%3D%22221%22%20cy%3D%2269%22%20r%3D%226.2%22/%3E%3Cpath%20d%3D%22M209%2090q11%20-18%2022%200z%22/%3E%3Ccircle%20cx%3D%22253%22%20cy%3D%2268%22%20r%3D%226.6%22/%3E%3Cpath%20d%3D%22M241%2091q12%20-19%2024%200z%22/%3E%3Ccircle%20cx%3D%22285%22%20cy%3D%2267%22%20r%3D%226.9%22/%3E%3Cpath%20d%3D%22M272%2091q13%20-20%2025%200z%22/%3E%3Ccircle%20cx%3D%22316%22%20cy%3D%2266%22%20r%3D%227.9%22/%3E%3Cpath%20d%3D%22M301%2093q14%20-23%2029%200z%22/%3E%3Ccircle%20cx%3D%22345%22%20cy%3D%2268%22%20r%3D%226.8%22/%3E%3Cpath%20d%3D%22M333%2091q12%20-20%2025%200z%22/%3E%3Ccircle%20cx%3D%22375%22%20cy%3D%2267%22%20r%3D%227.2%22/%3E%3Cpath%20d%3D%22M362%2092q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%22405%22%20cy%3D%2268%22%20r%3D%226.7%22/%3E%3Cpath%20d%3D%22M393%2091q12%20-20%2024%200z%22/%3E%3Ccircle%20cx%3D%22438%22%20cy%3D%2268%22%20r%3D%226.7%22/%3E%3Cpath%20d%3D%22M426%2091q12%20-19%2024%200z%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%22108%22%20r%3D%228.9%22/%3E%3Cpath%20d%3D%22M-0%20139q16%20-26%2032%200z%22/%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%22111%22%20r%3D%227.1%22/%3E%3Cpath%20d%3D%22M37%20136q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%2284%22%20cy%3D%22108%22%20r%3D%228.6%22/%3E%3Cpath%20d%3D%22M68%20138q16%20-25%2031%200z%22/%3E%3Ccircle%20cx%3D%22121%22%20cy%3D%22110%22%20r%3D%227.5%22/%3E%3Cpath%20d%3D%22M107%20136q14%20-22%2027%200z%22/%3E%3Ccircle%20cx%3D%22156%22%20cy%3D%22111%22%20r%3D%227.4%22/%3E%3Cpath%20d%3D%22M142%20136q13%20-21%2027%200z%22/%3E%3Ccircle%20cx%3D%22191%22%20cy%3D%22111%22%20r%3D%227.1%22/%3E%3Cpath%20d%3D%22M179%20136q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%22229%22%20cy%3D%22108%22%20r%3D%228.9%22/%3E%3Cpath%20d%3D%22M212%20138q16%20-26%2032%200z%22/%3E%3Ccircle%20cx%3D%22267%22%20cy%3D%22108%22%20r%3D%228.5%22/%3E%3Cpath%20d%3D%22M252%20138q16%20-25%2031%200z%22/%3E%3Ccircle%20cx%3D%22306%22%20cy%3D%22111%22%20r%3D%227.1%22/%3E%3Cpath%20d%3D%22M293%20136q13%20-21%2026%200z%22/%3E%3Ccircle%20cx%3D%22341%22%20cy%3D%22108%22%20r%3D%229.0%22/%3E%3Cpath%20d%3D%22M324%20139q16%20-26%2033%200z%22/%3E%3Ccircle%20cx%3D%22378%22%20cy%3D%22110%22%20r%3D%227.9%22/%3E%3Cpath%20d%3D%22M364%20137q14%20-23%2029%200z%22/%3E%3Ccircle%20cx%3D%22417%22%20cy%3D%22109%22%20r%3D%228.3%22/%3E%3Cpath%20d%3D%22M402%20138q15%20-24%2030%200z%22/%3E%3C/svg%3E") 0 54px/420px 150px repeat-x,
+  conic-gradient(from 160deg at 18% -40px,transparent 0 6deg,color-mix(in srgb,var(--accent) 30%,transparent) 10deg 22deg,transparent 28deg),
+  conic-gradient(from 178deg at 84% -40px,transparent 0 6deg,color-mix(in srgb,var(--accent) 26%,transparent) 10deg 20deg,transparent 26deg)}
+:root[data-style="arena"] body::after{top:auto;height:42vh;background:var(--text);opacity:.11;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20300%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M200%20-260L-520%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-460%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-400%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-340%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-280%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-220%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-160%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-100%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-40%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L20%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L80%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L140%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L200%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L260%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L320%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L380%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L440%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L500%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L560%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L620%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L680%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L740%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L800%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L860%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L920%20300%22/%3E%3Cpath%20d%3D%22M0%2010H400%22/%3E%3Cpath%20d%3D%22M0%2016H400%22/%3E%3Cpath%20d%3D%22M0%2024H400%22/%3E%3Cpath%20d%3D%22M0%2034H400%22/%3E%3Cpath%20d%3D%22M0%2048H400%22/%3E%3Cpath%20d%3D%22M0%2066H400%22/%3E%3Cpath%20d%3D%22M0%2090H400%22/%3E%3Cpath%20d%3D%22M0%20122H400%22/%3E%3Cpath%20d%3D%22M0%20164H400%22/%3E%3Cpath%20d%3D%22M0%20219H400%22/%3E%3Cpath%20d%3D%22M0%20292H400%22/%3E%3Cellipse%20cx%3D%22200%22%20cy%3D%22200%22%20rx%3D%22130%22%20ry%3D%2234%22%20stroke-width%3D%223.5%22/%3E%3Cpath%20d%3D%22M0%20200H400%22%20stroke-width%3D%223.5%22/%3E%3C/svg%3E") bottom/100% 100% no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20300%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%3E%3Cpath%20d%3D%22M200%20-260L-520%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-460%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-400%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-340%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-280%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-220%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-160%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-100%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L-40%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L20%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L80%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L140%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L200%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L260%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L320%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L380%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L440%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L500%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L560%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L620%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L680%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L740%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L800%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L860%20300%22/%3E%3Cpath%20d%3D%22M200%20-260L920%20300%22/%3E%3Cpath%20d%3D%22M0%2010H400%22/%3E%3Cpath%20d%3D%22M0%2016H400%22/%3E%3Cpath%20d%3D%22M0%2024H400%22/%3E%3Cpath%20d%3D%22M0%2034H400%22/%3E%3Cpath%20d%3D%22M0%2048H400%22/%3E%3Cpath%20d%3D%22M0%2066H400%22/%3E%3Cpath%20d%3D%22M0%2090H400%22/%3E%3Cpath%20d%3D%22M0%20122H400%22/%3E%3Cpath%20d%3D%22M0%20164H400%22/%3E%3Cpath%20d%3D%22M0%20219H400%22/%3E%3Cpath%20d%3D%22M0%20292H400%22/%3E%3Cellipse%20cx%3D%22200%22%20cy%3D%22200%22%20rx%3D%22130%22%20ry%3D%2234%22%20stroke-width%3D%223.5%22/%3E%3Cpath%20d%3D%22M0%20200H400%22%20stroke-width%3D%223.5%22/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+:root[data-style="arena"] h1,:root[data-style="arena"] h2,:root[data-style="arena"] .brand b{font-family:"Secular One",var(--font);font-weight:400;letter-spacing:0}
+:root[data-style="arena"] h1{font-size:28px}:root[data-style="arena"] .hero h1{font-size:25px}
+:root[data-style="arena"] :is(.card,.hero){background:color-mix(in srgb,var(--card) 66%,transparent);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);box-shadow:inset 0 1px 0 color-mix(in srgb,var(--accent) 25%,transparent),0 14px 40px -16px color-mix(in srgb,var(--accent) 45%,transparent)}
+:root[data-style="arena"] .hero{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+:root[data-style="arena"] .bnav a.on{color:var(--accent);text-shadow:0 0 14px var(--accent)}
+:root[data-style="arena"] .bnav a.on svg{filter:drop-shadow(0 0 6px var(--accent))}
+:root[data-style="arena"] :is(.btn.pri,.subtabs a.on){box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 60%,transparent),0 6px 22px -6px var(--accent)}
+
+/* ציור · סל: לוח, טבעת ורשת ענקיים, וכדור בדרך לסל */
+:root[data-style="hoop"] body::before{background:var(--text);opacity:.2;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%3E%20%3Crect%20x%3D%2270%22%20y%3D%2220%22%20width%3D%22260%22%20height%3D%22160%22%20rx%3D%226%22/%3E%3Crect%20x%3D%22160%22%20y%3D%2296%22%20width%3D%2280%22%20height%3D%2260%22/%3E%3Cpath%20d%3D%22M200%20180v-2%22/%3E%3Cpath%20d%3D%22M152%20182L180.5%20300%22/%3E%3Cpath%20d%3D%22M164%20182L187.0%20300%22/%3E%3Cpath%20d%3D%22M164%20182L174.0%20300%22/%3E%3Cpath%20d%3D%22M176%20182L193.5%20300%22/%3E%3Cpath%20d%3D%22M176%20182L180.5%20300%22/%3E%3Cpath%20d%3D%22M188%20182L200.0%20300%22/%3E%3Cpath%20d%3D%22M188%20182L187.0%20300%22/%3E%3Cpath%20d%3D%22M200%20182L206.5%20300%22/%3E%3Cpath%20d%3D%22M200%20182L193.5%20300%22/%3E%3Cpath%20d%3D%22M212%20182L213.0%20300%22/%3E%3Cpath%20d%3D%22M212%20182L200.0%20300%22/%3E%3Cpath%20d%3D%22M224%20182L219.5%20300%22/%3E%3Cpath%20d%3D%22M224%20182L206.5%20300%22/%3E%3Cpath%20d%3D%22M236%20182L226.0%20300%22/%3E%3Cpath%20d%3D%22M236%20182L213.0%20300%22/%3E%3Cpath%20d%3D%22M248%20182L219.5%20300%22/%3E%3Cpath%20d%3D%22M158%20222h84M165%20262h70%22%20stroke-width%3D%221.5%22/%3E%20%3Cpath%20d%3D%22M-20%20520C40%20300%20120%20210%20168%20190%22%20stroke-dasharray%3D%223%2012%22%20stroke-width%3D%224%22/%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat,url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.4%22%3E%3Cg%20transform%3D%22translate%2870%20330%29%22%3E%3Ccircle%20r%3D%2226%22/%3E%3Cpath%20d%3D%22M-26%200h52M0%20-26v52M-18%20-18c10%2010%2010%2026%200%2036M18%20-18c-10%2010%20-10%2026%200%2036%22/%3E%3C/g%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%3E%20%3Crect%20x%3D%2270%22%20y%3D%2220%22%20width%3D%22260%22%20height%3D%22160%22%20rx%3D%226%22/%3E%3Crect%20x%3D%22160%22%20y%3D%2296%22%20width%3D%2280%22%20height%3D%2260%22/%3E%3Cpath%20d%3D%22M200%20180v-2%22/%3E%3Cpath%20d%3D%22M152%20182L180.5%20300%22/%3E%3Cpath%20d%3D%22M164%20182L187.0%20300%22/%3E%3Cpath%20d%3D%22M164%20182L174.0%20300%22/%3E%3Cpath%20d%3D%22M176%20182L193.5%20300%22/%3E%3Cpath%20d%3D%22M176%20182L180.5%20300%22/%3E%3Cpath%20d%3D%22M188%20182L200.0%20300%22/%3E%3Cpath%20d%3D%22M188%20182L187.0%20300%22/%3E%3Cpath%20d%3D%22M200%20182L206.5%20300%22/%3E%3Cpath%20d%3D%22M200%20182L193.5%20300%22/%3E%3Cpath%20d%3D%22M212%20182L213.0%20300%22/%3E%3Cpath%20d%3D%22M212%20182L200.0%20300%22/%3E%3Cpath%20d%3D%22M224%20182L219.5%20300%22/%3E%3Cpath%20d%3D%22M224%20182L206.5%20300%22/%3E%3Cpath%20d%3D%22M236%20182L226.0%20300%22/%3E%3Cpath%20d%3D%22M236%20182L213.0%20300%22/%3E%3Cpath%20d%3D%22M248%20182L219.5%20300%22/%3E%3Cpath%20d%3D%22M158%20222h84M165%20262h70%22%20stroke-width%3D%221.5%22/%3E%20%3Cpath%20d%3D%22M-20%20520C40%20300%20120%20210%20168%20190%22%20stroke-dasharray%3D%223%2012%22%20stroke-width%3D%224%22/%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat,url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.4%22%3E%3Cg%20transform%3D%22translate%2870%20330%29%22%3E%3Ccircle%20r%3D%2226%22/%3E%3Cpath%20d%3D%22M-26%200h52M0%20-26v52M-18%20-18c10%2010%2010%2026%200%2036M18%20-18c-10%2010%20-10%2026%200%2036%22/%3E%3C/g%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat}
+:root[data-style="hoop"] body::after{background:var(--accent);opacity:.30;-webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%3E%20%3Cellipse%20cx%3D%22200%22%20cy%3D%22181%22%20rx%3D%2250%22%20ry%3D%229%22/%3E%3Cg%20transform%3D%22translate%2870%20330%29%22%3E%3Ccircle%20r%3D%2226%22%20fill%3D%22%23000%22/%3E%3C/g%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20400%20520%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%3E%20%3Cellipse%20cx%3D%22200%22%20cy%3D%22181%22%20rx%3D%2250%22%20ry%3D%229%22/%3E%3Cg%20transform%3D%22translate%2870%20330%29%22%3E%3Ccircle%20r%3D%2226%22%20fill%3D%22%23000%22/%3E%3C/g%3E%3C/svg%3E") 50% 70px/min(560px,140vw) auto no-repeat}
+:root[data-style="hoop"] h1,:root[data-style="hoop"] h2,:root[data-style="hoop"] .brand b{font-family:"Fredoka",var(--font);font-weight:700;letter-spacing:0}
+:root[data-style="hoop"] h1{font-size:28px}:root[data-style="hoop"] .hero h1{font-size:25px}
+:root[data-style="hoop"] :is(.card,.hero){border-radius:22px;background:color-mix(in srgb,var(--card) 74%,transparent)}
+:root[data-style="hoop"] :is(.btn,.chip,.subtabs,.subtabs a){border-radius:999px}
+:root[data-style="hoop"] .bnav a.on{color:var(--accent)}
+:root[data-style="hoop"] .bnav a.on::after{content:"";display:block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin:2px auto 0}
+:root[data-style] .modal.card{background:var(--card);backdrop-filter:none}
 
 </style>
 </head>
@@ -3781,6 +3898,9 @@ Object.assign(ACT, {
   },
   async pollClose(el) { const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, closeNow:true } }); if (chatRes(res)) pollsLoad(); },
   async pollDel(el) { if (!await confirmBox("למחוק את הסקר?", "הסקר והתשובות יימחקו.", "מחק", true)) return; const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, del:true } }); if (chatRes(res)) pollsLoad(); },
+  setPalette(el) { LS.set("league_palette", el.dataset.v); applyTheme(); refreshPalButtons(); },
+  setStyle(el) { LS.set("league_style", el.dataset.v); applyTheme(); refreshPalButtons(); },
+  setMode(el) { LS.set("league_theme", el.dataset.v); applyTheme(); refreshPalButtons(); },
   pollAddOpt() { const box = $("#pollOpts"); if (!box || box.children.length >= 32) return; box.insertAdjacentHTML("beforeend", pollOptRow(box.children.length)); pollOptCount(); box.lastElementChild.querySelector("input").focus(); },
   pollRmOpt(el) { el.closest(".poll-opt")?.remove(); pollOptCount(); },
   trainEdit() { TRAIN.edit = !TRAIN.edit; render(true); },
@@ -3909,12 +4029,43 @@ document.addEventListener("click", (e) => {
 
 const DEFAULT_BALL = $("#brandIcon")?.innerHTML || "";
 /* ערכת צבעים */
+// 4 ערכות צבעים: [מזהה, שם, צבעים לדוגמה]
+// מראה האתר: צבע × עיצוב (כל צבע עובד עם כל עיצוב)
+const PALETTES = [["orange", "כתום", "#ff7a1a"], ["purple", "סגול", "#a855f7"], ["mono", "שחור-לבן", "linear-gradient(135deg,#000 50%,#fff 50%)"],
+  ["red", "אדום", "#e11d2e"], ["blue", "כחול", "#1e7bf0"], ["green", "ירוק-זהב", "linear-gradient(135deg,#0f7a43 50%,#f5c542 50%)"]];
+const STYLES = [["classic", "רגיל (בלי עיצוב)", "", ""], ["chalk", "לוח טקטיקה", "Amatic+SC:wght@700", "p"], ["jersey", "גופייה", "Karantina:wght@700", "p"], ["street", "מגרש רחוב", "Rubik+Dirt", "p"],
+  ["court", "מגרש", "Suez+One", "d"], ["arena", "ארנה", "Secular+One", "d"], ["hoop", "סל", "Fredoka:wght@700", "d"]];
+// כל עיצוב טוען רק את הגופן שלו
+function loadThemeFont(st) {
+  const f = STYLES.find(p => p[0] === st)?.[2]; if (!f || document.getElementById("font-" + st)) return;
+  const l = document.createElement("link"); l.id = "font-" + st; l.rel = "stylesheet"; l.href = `https://fonts.googleapis.com/css2?family=${f}&display=swap`; document.head.appendChild(l);
+}
 function applyTheme() {
   const t = LS.get("league_theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-  document.documentElement.dataset.theme = t; $("#themeBtn").innerHTML = t === "light" ? I.moon : I.sun;
-  document.querySelector('meta[name="theme-color"]').content = t === "light" ? "#f3f5fb" : "#0b1020";
+  const pal = PALETTES.some(p => p[0] === LS.get("league_palette")) ? LS.get("league_palette") : "orange";
+  const st = STYLES.some(p => p[0] === LS.get("league_style")) ? LS.get("league_style") : "classic";
+  document.documentElement.dataset.theme = t; document.documentElement.dataset.palette = pal; document.documentElement.dataset.style = st; loadThemeFont(st); $("#themeBtn").innerHTML = t === "light" ? I.moon : I.sun;
+  requestAnimationFrame(() => { const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim(); document.querySelector('meta[name="theme-color"]').content = bg || "#0b1020"; });
 }
-$("#themeBtn").addEventListener("click", () => { LS.set("league_theme", document.documentElement.dataset.theme === "light" ? "dark" : "light"); applyTheme(); });
+// "מראה האתר": צבע + עיצוב + כהה/בהיר – חלון קטן מהכפתור למעלה
+function lookModal() {
+  const t = document.documentElement.dataset.theme, cur = document.documentElement.dataset.palette, cst = document.documentElement.dataset.style;
+  const stBtn = ([id, nm]) => `<button type="button" class="st${id === cst ? " on" : ""}" data-act="setStyle" data-v="${id}">${nm}</button>`;
+  modal(`<h2>🎨 מראה האתר</h2>
+    <div class="look-h">צבע</div><div class="sw-row">${PALETTES.map(([id, nm, c]) => `<button type="button" class="sw${id === cur ? " on" : ""}" data-act="setPalette" data-v="${id}"><i style="background:${c}"></i>${nm}</button>`).join("")}</div>
+    <div class="look-h">עיצוב</div><div class="st-row">${stBtn(STYLES[0])}</div>
+    <div class="look-h">דוגמאות</div><div class="st-row">${STYLES.filter(s => s[3] === "p").map(stBtn).join("")}</div>
+    <div class="look-h">ציורי רקע</div><div class="st-row">${STYLES.filter(s => s[3] === "d").map(stBtn).join("")}</div>
+    <div class="look-h">רקע</div><div class="mode-row"><button type="button" class="btn${t !== "light" ? " on" : ""}" data-act="setMode" data-v="dark">🌙 כהה</button><button type="button" class="btn${t === "light" ? " on" : ""}" data-act="setMode" data-v="light">☀️ בהיר</button></div>
+    <p class="small muted" style="margin:10px 0 0">נשמר רק אצלך.</p>
+    <button class="btn pri" data-close style="margin-top:12px;width:100%">סגור</button>`);
+}
+$("#themeBtn").addEventListener("click", lookModal);
+$("#themeBtn").title = "מראה האתר"; $("#themeBtn").setAttribute("aria-label", "מראה האתר");
+function refreshPalButtons() { const r = document.documentElement.dataset, t = r.theme;
+  document.querySelectorAll("[data-act=setPalette]").forEach(b => b.classList.toggle("on", b.dataset.v === r.palette));
+  document.querySelectorAll("[data-act=setStyle]").forEach(b => b.classList.toggle("on", b.dataset.v === r.style));
+  document.querySelectorAll("[data-act=setMode]").forEach(b => b.classList.toggle("on", b.dataset.v === t)); }
 
 /* רענון כשחוזרים לטאב */
 document.addEventListener("visibilitychange", async () => {
