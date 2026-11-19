@@ -1889,8 +1889,6 @@ function pageRecords() {
   if (!DB.teams.length) return emptyLeague();
   const fin = sortedGames().filter(isFinal);
   const gname = (g) => `${esc(tn(team(g.homeId)) || "")} <b dir="ltr">${g.homeScore}-${g.awayScore}</b> ${esc(tn(team(g.awayId)) || "")}`;
-  const plist = (k, l, unit) => { const xs = gameHighs(k, 3); if (!xs.length) return "";
-    return `<div class="card pad rec"><h3>${l}</h3>${xs.map((x, i) => `<a class="rec-row" href="#/game/${x.g.id}"><span class="rk">${i + 1}</span><span class="nm">${esc(x.p.name)}<small>${esc(tn(team(x.p.teamId)) || "")} · ${esc(fmtDM(x.g.date))}</small></span><b>${x.v}${unit ? ` <small>${unit}</small>` : ""}</b></a>`).join("")}</div>`; };
   const glist = (l, xs, fmt) => xs.length ? `<div class="card pad rec"><h3>${l}</h3>${xs.map((x, i) => `<a class="rec-row" href="#/game/${x.g.id}"><span class="rk">${i + 1}</span><span class="nm">${fmt(x)}<small>${esc(fmtDM(x.g.date))}</small></span><b>${x.v}</b></a>`).join("")}</div>` : "";
   const top3 = (arr, f) => arr.map(x => ({ ...x, v: f(x) })).sort((a, b) => b.v - a.v).slice(0, 3);
   const teamScores = fin.flatMap(g => [{ g, t: team(g.homeId), v: g.homeScore }, { g, t: team(g.awayId), v: g.awayScore }]);
@@ -1898,10 +1896,8 @@ function pageRecords() {
   // רצף ניצחונות הכי ארוך
   let streak = null;
   for (const t of DB.teams) { let n = 0; for (const g of fin) { if (g.homeId !== t.id && g.awayId !== t.id) continue; const w = g.homeId === t.id ? g.homeScore > g.awayScore : g.awayScore > g.homeScore; n = w ? n + 1 : 0; if (!streak || n > streak.n) streak = { t, n }; } }
-  return `<h1>שיאי הליגה</h1><p class="muted small" style="margin-top:-6px">הכי טוב במשחק אחד, מכל המשחקים שהוזנו.</p>
-  <h2 class="sec">שחקנים – במשחק אחד</h2>
-  <div class="grid g3">${plist("pts", "נקודות", "נק'")}${plist("fg3m", "שלשות")}${plist("reb", "ריבאונדים")}${plist("ast", "אסיסטים")}${plist("stl", "חטיפות")}${plist("blk", "חסימות")}</div>
-  <h2 class="sec">קבוצות</h2>
+  return `${pageLeaders()}
+  <h2 class="sec">שיאי קבוצות</h2>
   <div class="grid g3">
     ${glist("הכי הרבה נקודות במשחק", top3(teamScores, x => x.v), x => esc(tn(x.t) || ""))}
     ${glist("הכי מעט נקודות במשחק", low, x => esc(tn(x.t) || ""))}
@@ -2451,7 +2447,7 @@ function pagePlayers(q) {
   </div>
   ${body}
   <a class="btn sm" href="#/compare" style="margin-top:12px">⚖️ השוואת שחקנים</a>
-  <p class="small muted" style="margin-top:8px">לחץ על שחקן לכל הנתונים שלו. הטבלאות והדירוגים – בלשונית <a href="#/leaders"><b>מובילים</b></a>.</p>`;
+  <p class="small muted" style="margin-top:8px">לחץ על שחקן לכל הנתונים שלו. הטבלאות והדירוגים – בלשונית <a href="#/records"><b>מובילים ושיאים</b></a>.</p>`;
 }
 function pageLeaders(q) {
   if (!DB.players.length) return emptyLeague();
@@ -2467,13 +2463,14 @@ function pageLeaders(q) {
   const rateBig = rTop.length ? `<div class="card pad ld ld-click rate-top" data-act="ldAll" data-k="rate" data-scope="league" data-min="${minG}" role="button"><h3><span>טופ 10 בליגה – ציון ממוצע (1-10)</span><small class="ld-more">כולם ←</small></h3><ol>${rTop.map((x, i) => li(x, rtBadge(Math.round(x.v * 10) / 10), `<span class="rk ${i < 3 ? "top" : ""}">#${i + 1}</span> ${esc(tn(team(x.p.teamId)) || "")} · ${x.a.n.rate} מש'`)).join("")}</ol></div>` : "";
   const cards = (ks) => ks.map(k => C(k) && leaderCard(C(k), minG, 10, rows, "league")).filter(Boolean).join("");
   const sec = (title, inner, sub = "") => inner ? `<section class="sec"><div class="sec-h"><h2>${title}</h2>${sub ? `<span class="small muted">${sub}</span>` : ""}</div>${inner}</section>` : "";
-  return `<h1>מובילי הליגה</h1>
+  return `<h1>מובילים ושיאים</h1>
   ${sec("נקודות", `<div class="grid g3">${cards(["pts","ptsTot"])}${hiCard("pts", "הכי הרבה נקודות")}</div>`, "כל הליגה")}
+  ${sec("שלשות", `<div class="grid g3">${hiCard("fg3m", "הכי הרבה שלשות")}</div>`, "כל הליגה")}
   <div class="accs sec">${acc("ld-ppg", "כל השחקנים בליגה לפי נקודות", ptsLeagueTable(rows), { sub:"מ-1 עד האחרון · לחץ על כותרת למיון", icon:"" })}</div>
   ${sec("ציונים", rateBig ? `<p class="small muted rate-note">הציון (1-10) מחושב לכל שחקן בכל משחק מכל מה שהוזן: נקודות, החטאות, ריבאונדים, אסיסטים, חטיפות, חסימות, איבודים, עבירות ו-+/-. 5 = משחק רגיל, 7+ = משחק טוב, 8.5+ = משחק ענק.</p>${rateBig}` : "", "כל הליגה")}
   ${sec("הציון הכי גבוה במשחק אחד", hiCard("rate", "הציון הכי גבוה", rtBadge))}
   ${(() => { const ms = roundMvps(); return ms.length ? sec("שחקני המחזור", `<div class="grid g3">${ms.map(m => mvpCard(m, false)).join("")}</div>`, "הציון הכי גבוה בכל מחזור") : ""; })()}
-  <p class="small muted">כאן רק נתונים שיש לכל הליגה (ציון ונקודות). ריבאונדים, אסיסטים ושאר הנתונים – בלשונית <a href="#/myteam"><b>הקבוצה שלי</b></a> ← מובילי הקבוצה. לחץ על כרטיס כדי לראות את כל השחקנים מ-1 עד האחרון.</p>`;
+  <p class="small muted">כאן רק נתונים שיש לכל הליגה (נקודות, שלשות וציון). ריבאונדים, אסיסטים ושאר הנתונים – בלשונית <a href="#/myteam"><b>הקבוצה שלי</b></a>.</p>`;
 }
 function pageTeams() {
   if (!DB.teams.length) return emptyLeague();
@@ -3057,7 +3054,7 @@ const ACT = {
   gfilter(el) { const q = qs(); const v = el.dataset.v ?? el.value; v ? q.set(el.dataset.f, v) : q.delete(el.dataset.f); setQ("games", q); },
   pfilter(el) { const q = qs(); el.value ? q.set("team", el.value) : q.delete("team"); setQ("players", q); },
   apfilter(el) { const q = new URLSearchParams(); q.set("team", el.value); go("#/admin/players?" + q); },
-  minG(el) { const q = qs(); q.set("min", el.dataset.v); setQ("leaders", q); },
+  minG(el) { const q = qs(); q.set("min", el.dataset.v); setQ("records", q); },
   logout() { logout(); },
   acc(el) {
     const sec = el.closest(".acc"), k = sec.dataset.key, open = !sec.classList.contains("open");
@@ -4262,7 +4259,7 @@ function navList() {
   return out;
 }
 // 6 לשוניות ראשיות, ובתוך חלק מהן לשוניות קטנות
-const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"],["whatif","מחשבון"]], players:[["players","שחקנים"],["leaders","מובילים"],["compare","השוואה"],["records","שיאים"]],
+const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"],["whatif","מחשבון"]], players:[["players","שחקנים"],["records","מובילים ושיאים"],["compare","השוואה"]],
   myteam:[["myteam","סטטיסטיקה"],["training","אימונים"]], chat:[["chat","צ'אט"],["polls","סקרים"],["predict","ניחושים"],["people","אנשים", "mod"]] };
 const NAV_OF = { whatif:"standings", records:"players", teams:"standings", leaders:"players", mvps:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
 function render(keepFocus) {
@@ -4286,7 +4283,7 @@ function render(keepFocus) {
   else if (page === "team") html = pageTeam(parts[1]);
   else if (page === "player") html = pagePlayer(parts[1]);
   else if (page === "players") html = pagePlayers(q);
-  else if (page === "leaders") html = pageLeaders(q);
+  else if (page === "leaders") html = pageRecords();
   else if (page === "myteam" || page === "stats") html = pageMyTeam();
   else if (page === "teams") html = pageTeams();
   else if (page === "compare") html = pageCompare(q);
