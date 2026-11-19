@@ -541,7 +541,7 @@ async function pushRoute(req, url, path, store, lvl, chatStore) {
     if (req.method === "DELETE") { await updateKey(store, "subs", () => ({}), (d) => { delete d[k]; return { ok: true }; }); return json({ ok: true }); }
     if (!s.keys?.p256dh || !s.keys?.auth) return json({ ok: false, error: "bad-sub" }, 400);
     const pr = b.prefs || {};
-    const prefs = { start: !!pr.start, final: !!pr.final, teams: (Array.isArray(pr.teams) ? pr.teams : []).map(cleanId).filter(Boolean).slice(0, 20), poll: !!pr.poll, pin: !!pr.pin, reply: !!pr.reply };
+    const prefs = { start: !!pr.start, final: !!pr.final, remind: !!pr.remind, teams: (Array.isArray(pr.teams) ? pr.teams : []).map(cleanId).filter(Boolean).slice(0, 20), poll: !!pr.poll, pin: !!pr.pin, reply: !!pr.reply };
     // התראות מהצ'אט רק למי שנכנס לצ'אט (מזהים אותו לפי כרטיס הכניסה שלו)
     let uid = "";
     if (b.chatToken && (prefs.poll || prefs.pin || prefs.reply)) {
@@ -570,6 +570,43 @@ async function pushRoute(req, url, path, store, lvl, chatStore) {
     return json({ ok: true, ...r });
   }
   return json({ ok: false, error: "not-found" }, 404);
+}
+
+/* ================= תזכורת שעה לפני משחק =================
+   רץ כל רבע שעה (מהקובץ remind.mjs). שולח פעם אחת לכל משחק שמתחיל בעוד 45–75 דקות,
+   רק למי שסימן "תזכורת" – ולפי הקבוצות שבחר (או כל המשחקים). */
+// הפרש השעות של ישראל בתאריך מסוים (חורף/קיץ)
+function ilOffsetMin(d) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Jerusalem", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(d).map((x) => [x.type, x.value]));
+  return (Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - Math.floor(d.getTime() / 60000) * 60000) / 60000;
+}
+export function gameStartUtc(date, time) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "") || !/^\d{2}:\d{2}$/.test(time || "")) return null;
+  const guess = new Date(`${date}T${time}:00Z`);
+  return new Date(guess.getTime() - ilOffsetMin(guess) * 60000);
+}
+export async function runReminders(dataStore, pushStore, origin, now = new Date()) {
+  const doc = await dataStore.get("league", { type: "json" });
+  const d = doc?.data; if (!d?.games) return { sent: 0, games: 0 };
+  const tn = (id) => (d.teams.find((t) => t.id === id)?.name || "").replace(/\s*מחוזית.*$/, "");
+  let sent = 0, games = 0;
+  for (const g of d.games) {
+    if (g.status === "final" || g.status === "live") continue;
+    const t = gameStartUtc(g.date, g.time); if (!t) continue;
+    const mins = (t - now) / 60000; if (mins < 40 || mins > 76) continue;
+    const key = "remind:" + g.id;
+    const first = await updateKey(pushStore, "sent", () => ({}), (x) => { if (x[key]) return { ok: true, dup: true }; x[key] = Date.now(); return { ok: true }; });
+    if (first.dup) continue;
+    games++;
+    const venue = g.venue || d.teams.find((x) => x.id === g.homeId)?.venue || "";
+    const tids = [g.homeId, g.awayId];
+    try {
+      const r = await pushTo(pushStore, origin, (x) => x.prefs?.remind && (!x.prefs.teams?.length || x.prefs.teams.some((id) => tids.includes(id))),
+        { title: `⏰ בעוד שעה: ${tn(g.homeId)} נגד ${tn(g.awayId)}`, body: `${g.time}${venue ? " · " + venue : ""}`, url: "#/game/" + g.id, tag: key });
+      sent += r.sent;
+    } catch {}
+  }
+  return { sent, games };
 }
 
 /* קוד ההתראות שרץ ברקע בטלפון (service worker) – מוגש מכאן כדי שלא יהיה עוד קובץ .js בתיקייה */

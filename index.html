@@ -770,6 +770,70 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 :root[data-style="hoop"] .bnav a.on{color:var(--accent)}
 :root[data-style="hoop"] .bnav a.on::after{content:"";display:block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin:2px auto 0}
 :root[data-style] .modal.card{background:var(--card);backdrop-filter:none}
+.venue{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.venue>div:first-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.venue .row-actions{margin:0}
+
+/* ===== תגים ===== */
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.bdg{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-size:13px;font-weight:600}
+.bdg i{font-style:normal}.bdg b{color:var(--accent)}
+/* ===== ספירה לאחור ===== */
+.cd-card{display:flex;flex-direction:column;gap:4px;border-inline-start:4px solid var(--accent)}
+.cd-card .cd{font-size:26px;font-weight:800;color:var(--accent);line-height:1.2}
+/* ===== שיאים ===== */
+.rec h3{margin:0 0 6px;font-size:15px}
+.rec-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+.rec-row:first-of-type{border-top:0}
+.rec-row .rk{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--card2);font-size:12px;font-weight:700;flex:none}
+.rec-row:first-of-type .rk{background:var(--accent);color:var(--accent-ink)}
+.rec-row .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.rec-row .nm small{color:var(--muted);font-size:12px}
+.rec-row>b{font-size:18px}.rec-row>b small{font-size:11px;color:var(--muted)}
+/* ===== מחשבון טבלה ===== */
+.wi-tbl tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.wi-round{margin-top:8px}.wi-round h3{margin:0 0 6px;font-size:14px;color:var(--muted)}
+.wi-g{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:4px 0}
+.wi-b{border:2px solid var(--line);background:var(--card2);border-radius:10px;padding:7px 8px;cursor:pointer;color:var(--text);font:inherit;min-width:0;overflow:hidden;text-align:start}
+.wi-b.on{border-color:var(--win,#22c55e);background:color-mix(in srgb,var(--win,#22c55e) 16%,var(--card2))}
+.wi-b.on::after{content:" ✓";font-weight:800;color:var(--win,#22c55e)}
+/* ===== השוואה מרובה ===== */
+.cmp-picks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:12px}
+.cmp-multi{font-size:13px}.cmp-multi th,.cmp-multi td{text-align:center;white-space:nowrap;padding:7px 3px}
+.cmp-multi thead th{vertical-align:bottom}
+.cmp-multi tbody th{text-align:start;font-weight:500;font-size:12px;color:var(--muted);position:sticky;inset-inline-start:0;background:var(--card);white-space:normal;min-width:64px;max-width:80px}
+.cmp-h{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11.5px;line-height:1.2;width:52px;white-space:normal;margin:auto;overflow-wrap:anywhere}
+.cmp-h img,.cmp-h .tlogo{width:28px;height:28px;border-radius:8px;object-fit:contain}
+.cmp-h .jn{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700}
+/* ===== חיפוש ===== */
+.srch-res{display:flex;flex-direction:column;margin-top:8px;max-height:55vh;overflow:auto}
+.srch-res a{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.srch-res a small{color:var(--muted);margin-inline-start:auto;font-size:12px}
+.srch-res .jn{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+/* ===== למעלה ===== */
+.top-fab{position:fixed;inset-inline-end:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:45;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--line);background:var(--card);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
+  opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.top-fab.show{opacity:1;pointer-events:auto;transform:none}
+@media(min-width:860px){.top-fab{bottom:24px}}
+/* ===== אנימציית פתיחה ===== */
+.intro{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;transition:opacity .35s}
+.intro.out{opacity:0}
+.intro-stage{position:relative;width:220px;height:240px}
+.intro-hoop{position:absolute;top:0;left:50%;width:180px;transform:translateX(-50%);color:var(--text);z-index:1}
+.intro-ball{position:absolute;width:38px;height:38px;border-radius:50%;left:50%;top:0;margin-left:-19px;
+  background:radial-gradient(circle at 35% 35%,#ffb15e,#e8670f 60%,#a8440a);box-shadow:inset 0 0 0 2px #2a1203;
+  animation:introShot 1.15s cubic-bezier(.25,.55,.45,1) forwards;z-index:0}
+.intro-ball::before,.intro-ball::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #2a1203;border-left-color:transparent;border-right-color:transparent}
+.intro-ball::after{transform:rotate(90deg)}
+@keyframes introShot{0%{transform:translate(-170px,330px) rotate(0);opacity:1}50%{transform:translate(-30px,-50px) rotate(-200deg);opacity:1}72%{transform:translate(0,62px) rotate(-300deg);opacity:1}88%{transform:translate(0,125px) rotate(-340deg);opacity:1}100%{transform:translate(0,175px) rotate(-360deg);opacity:0}}
+.intro-net{transform-origin:60px 60px;animation:introNet .45s .82s ease-out}
+@keyframes introNet{50%{transform:scaleY(1.25)}}
+.intro-clock{display:flex;flex-direction:column;align-items:center;gap:6px;background:#050505;border:4px solid #222;border-radius:18px;padding:18px 34px;box-shadow:0 0 40px rgba(255,40,40,.25)}
+.intro-clock b{font:800 110px/1 "Rubik",monospace;color:#ff3030;text-shadow:0 0 18px #ff3030;font-variant-numeric:tabular-nums;min-width:2ch;text-align:center}
+.intro-clock small{color:#ff8a8a;letter-spacing:.3em;font-size:12px}
+.intro.buzz .intro-clock{animation:introBuzz .35s}
+@keyframes introBuzz{0%,100%{transform:none}25%{transform:scale(1.08)}50%{background:#ff3030}}
 
 </style>
 </head>
@@ -781,6 +845,7 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
       <span style="min-width:0"><b id="leagueName">הליגה</b><small id="leagueSeason"></small></span>
     </a>
     <nav class="topnav" id="topnav"></nav>
+    <button class="iconbtn" id="searchBtn" data-act="search" title="חיפוש" aria-label="חיפוש"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="20" height="20"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
     <button class="iconbtn" id="bellBtn" data-act="bell" title="התראות" aria-label="התראות"></button>
     <button class="iconbtn" id="themeBtn" title="מצב בהיר/כהה" aria-label="מצב בהיר/כהה"></button>
     <a class="iconbtn" id="adminBtn" href="#/admin" title="ניהול" aria-label="ניהול"></a>
@@ -1694,6 +1759,25 @@ function meHomeCard() {
     ${nx ? `<div class="small muted" style="margin-top:6px">המשחק הבא${p ? " שלך" : ""}: <a href="#/game/${nx.id}"><b>נגד ${esc(tn(opp) || "")}</b> · ${esc(fmtDate(nx.date))}${nx.time ? " · " + esc(nx.time) : ""}</a></div>` : ""}
   </div></section>`;
 }
+// ספירה לאחור למשחק הבא שלנו
+const gameStart = (g) => g?.date ? new Date(`${g.date}T${/^\d\d:\d\d$/.test(g.time || "") ? g.time : "00:00"}:00`) : null;
+function cdText(g) {
+  const t = gameStart(g); if (!t) return "";
+  let ms = t - Date.now();
+  if (g.status === "live") return "משוחק עכשיו!";
+  if (ms <= 0) return ms > -2 * 3600e3 ? (g.time ? "מתחיל עכשיו!" : "היום") : "נגמר – מחכים לתוצאה";
+  const d = Math.floor(ms / 864e5); ms -= d * 864e5; const h = Math.floor(ms / 3600e3); ms -= h * 3600e3; const m = Math.floor(ms / 60e3);
+  return [d && `${d} ${d === 1 ? "יום" : "ימים"}`, (d || h) && `${h} ${h === 1 ? "שעה" : "שעות"}`, !d && `${m} דק'`].filter(Boolean).join(" · ");
+}
+function countdownCard(g, mid) {
+  if (!g || !g.date) return "";
+  const opp = team(g.homeId === mid ? g.awayId : g.homeId), v = venueOf(g);
+  return `<section class="sec"><a class="card pad cd-card" href="#/game/${g.id}">
+    <span class="small muted">⏱️ המשחק הבא שלנו – ${g.homeId === mid ? "בבית" : "בחוץ"} נגד <b>${esc(tn(opp) || "")}</b></span>
+    <b class="cd" data-cd="${g.id}">${esc(cdText(g))}</b>
+    <span class="small muted">${esc(fmtDate(g.date))}${g.time ? " · " + esc(g.time) : ""}${v?.name ? " · " + esc(v.name) : ""}</span></a></section>`;
+}
+setInterval(() => document.querySelectorAll("[data-cd]").forEach(el => { const g = game(el.dataset.cd); if (g) el.textContent = cdText(g); }), 30e3);
 function pageHome() {
   if (!DB.teams.length) return emptyLeague();
   const st = standings();
@@ -1722,6 +1806,7 @@ function pageHome() {
       <div class="kpi"><b>${done.length ? f1(totalPts / done.length / 2) : "—"}</b><span>נק' לקבוצה במשחק</span></div>
     </div>
   </section>
+  ${countdownCard(nextMy, mid)}
   ${meHomeCard()}
   ${(() => { const m = roundMvps().find(x => x.done); return m ? `<section class="sec">${mvpCard(m)}</section>` : ""; })()}
   <div class="grid g2 sec">
@@ -1733,6 +1818,75 @@ function pageHome() {
   </div>
   ${next.length ? `<section class="sec"><div class="sec-h"><h2>המשחקים הבאים</h2></div><div class="grid g3">${next.slice(0, 6).map(gameCard).join("")}</div></section>` : ""}
   ${myCard || leadersHtml ? `<section class="sec"><div class="sec-h"><h2>הקבוצה שלי</h2><a class="more" href="#/myteam">לכל הסטטיסטיקה ←</a></div><div class="grid g2">${myCard}${leadersHtml}</div></section>` : ""}`;
+}
+
+/* ================= חיפוש מהיר ================= */
+function searchModal() {
+  modal(`<h2>🔍 חיפוש</h2><input class="inp" id="srchIn" placeholder="שם שחקן, מספר או קבוצה" autocomplete="off"><div id="srchRes" class="srch-res"></div>`, (m) => {
+    const inp = m.querySelector("#srchIn"), out = m.querySelector("#srchRes");
+    const norm = (x) => String(x || "").toLowerCase().replace(/["'׳״-]/g, "").replace(/\s+/g, " ").trim();
+    const run = () => { const v = norm(inp.value); if (!v) { out.innerHTML = ""; return; }
+      const ts = DB.teams.filter(t => norm(t.name).includes(v)).slice(0, 4);
+      const ps = DB.players.filter(p => norm(p.name).includes(v) || String(p.number) === v).slice(0, 12);
+      out.innerHTML = [...ts.map(t => `<a href="#/team/${t.id}" data-close>${badge(t, { link:false })}<small>קבוצה</small></a>`),
+        ...ps.map(p => { const t = team(p.teamId); return `<a href="#/player/${p.id}" data-close><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</span><b>${esc(p.name)}</b><small>${esc(tn(t) || "")}</small></a>`; })].join("")
+        || `<p class="muted small">לא נמצא כלום</p>`; };
+    inp.addEventListener("input", run);
+  });
+}
+/* ================= שיאי ליגה ================= */
+function pageRecords() {
+  if (!DB.teams.length) return emptyLeague();
+  const fin = sortedGames().filter(isFinal);
+  const gname = (g) => `${esc(tn(team(g.homeId)) || "")} <b dir="ltr">${g.homeScore}-${g.awayScore}</b> ${esc(tn(team(g.awayId)) || "")}`;
+  const plist = (k, l, unit) => { const xs = gameHighs(k, 3); if (!xs.length) return "";
+    return `<div class="card pad rec"><h3>${l}</h3>${xs.map((x, i) => `<a class="rec-row" href="#/game/${x.g.id}"><span class="rk">${i + 1}</span><span class="nm">${esc(x.p.name)}<small>${esc(tn(team(x.p.teamId)) || "")} · ${esc(fmtDM(x.g.date))}</small></span><b>${x.v}${unit ? ` <small>${unit}</small>` : ""}</b></a>`).join("")}</div>`; };
+  const glist = (l, xs, fmt) => xs.length ? `<div class="card pad rec"><h3>${l}</h3>${xs.map((x, i) => `<a class="rec-row" href="#/game/${x.g.id}"><span class="rk">${i + 1}</span><span class="nm">${fmt(x)}<small>${esc(fmtDM(x.g.date))}</small></span><b>${x.v}</b></a>`).join("")}</div>` : "";
+  const top3 = (arr, f) => arr.map(x => ({ ...x, v: f(x) })).sort((a, b) => b.v - a.v).slice(0, 3);
+  const teamScores = fin.flatMap(g => [{ g, t: team(g.homeId), v: g.homeScore }, { g, t: team(g.awayId), v: g.awayScore }]);
+  const low = teamScores.slice().sort((a, b) => a.v - b.v).slice(0, 3);
+  // רצף ניצחונות הכי ארוך
+  let streak = null;
+  for (const t of DB.teams) { let n = 0; for (const g of fin) { if (g.homeId !== t.id && g.awayId !== t.id) continue; const w = g.homeId === t.id ? g.homeScore > g.awayScore : g.awayScore > g.homeScore; n = w ? n + 1 : 0; if (!streak || n > streak.n) streak = { t, n }; } }
+  return `<h1>שיאי הליגה</h1><p class="muted small" style="margin-top:-6px">הכי טוב במשחק אחד, מכל המשחקים שהוזנו.</p>
+  <h2 class="sec">שחקנים – במשחק אחד</h2>
+  <div class="grid g3">${plist("pts", "נקודות", "נק'")}${plist("fg3m", "שלשות")}${plist("reb", "ריבאונדים")}${plist("ast", "אסיסטים")}${plist("stl", "חטיפות")}${plist("blk", "חסימות")}</div>
+  <h2 class="sec">קבוצות</h2>
+  <div class="grid g3">
+    ${glist("הכי הרבה נקודות במשחק", top3(teamScores, x => x.v), x => esc(tn(x.t) || ""))}
+    ${glist("הכי מעט נקודות במשחק", low, x => esc(tn(x.t) || ""))}
+    ${glist("הניצחון הכי גדול", top3(fin.map(g => ({ g })), x => Math.abs(x.g.homeScore - x.g.awayScore)), x => gname(x.g))}
+    ${glist("הכי הרבה נקודות ביחד", top3(fin.map(g => ({ g })), x => x.g.homeScore + x.g.awayScore), x => gname(x.g))}
+    ${glist("המשחק הכי צמוד", fin.map(g => ({ g, v: Math.abs(g.homeScore - g.awayScore) })).sort((a, b) => a.v - b.v).slice(0, 3), x => gname(x.g))}
+    ${streak && streak.n ? `<div class="card pad rec"><h3>רצף הניצחונות הכי ארוך</h3><a class="rec-row" href="#/team/${streak.t.id}"><span class="rk">1</span><span class="nm">${esc(tn(streak.t))}</span><b>${streak.n}</b></a></div>` : ""}
+  </div>`;
+}
+
+/* ================= מחשבון טבלה: "מה אם" ================= */
+const WHATIF = {};
+function pageWhatIf() {
+  if (!DB.teams.length) return emptyLeague();
+  const L = DB.league, wp = +L.winPts || 2, lp = +L.lossPts || 1;
+  const rem = sortedGames().filter(g => !isFinal(g) && team(g.homeId) && team(g.awayId));
+  for (const k of Object.keys(WHATIF)) if (!rem.some(g => g.id === k)) delete WHATIF[k];
+  const real = DB.games; let st;
+  DB.games = real.map(g => WHATIF[g.id] && !isFinal(g) ? { ...g, status:"final", homeScore: WHATIF[g.id] === "h" ? 1 : 0, awayScore: WHATIF[g.id] === "a" ? 1 : 0 } : g);
+  try { st = standings(); } finally { DB.games = real; }
+  const left = (tid) => rem.filter(g => !WHATIF[g.id] && (g.homeId === tid || g.awayId === tid)).length;
+  const top = st[0], mid = myTeamId();
+  const rows = st.map(s => { const max = s.lp + left(s.t.id) * wp, can = max >= top.lp;
+    return `<tr class="${s.t.id === mid ? "me" : ""}"><td>${s.rank}</td><td class="l">${badge(s.t)}</td><td dir="ltr">${s.w}-${s.l}</td><td><b>${s.lp}</b></td><td>${left(s.t.id)}</td><td>${max}</td><td>${s.rank === 1 ? "👑" : can ? "✓" : "✗"}</td></tr>`; }).join("");
+  const byRound = new Map(); for (const g of rem) { const r = g.round || "—"; if (!byRound.has(r)) byRound.set(r, []); byRound.get(r).push(g); }
+  const pick = (g, side) => { const t = team(side === "h" ? g.homeId : g.awayId), on = WHATIF[g.id] === side;
+    return `<button class="wi-b ${on ? "on" : ""}" data-act="whatIf" data-g="${g.id}" data-v="${side}">${badge(t, { link:false })}</button>`; };
+  const n = Object.keys(WHATIF).length;
+  return `<h1>מחשבון טבלה</h1>
+  <p class="muted small" style="margin-top:-6px">בחר מי מנצח במשחקים שנשארו, והטבלה מתעדכנת. זה רק אצלך, לא משנה כלום באתר.</p>
+  <div class="row-actions" style="margin:10px 0"><button class="btn sm" data-act="whatIfMine">💪 הקבוצה שלי מנצחת הכל</button>${n ? `<button class="btn sm" data-act="whatIfReset">↺ נקה (${n})</button>` : ""}</div>
+  <div class="card tbl-wrap"><table class="wi-tbl"><thead><tr><th>#</th><th class="l">קבוצה</th><th>נ-ה</th><th>נק'</th><th>נשארו</th><th>מקס'</th><th>ראשונה?</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="small muted" style="margin-top:6px">מקס' = כמה נקודות אפשר להגיע אם מנצחים בכל המשחקים שנשארו (ניצחון ${wp}, הפסד ${lp}). ✓ = עוד יכולה לסיים ראשונה. בשוויון ההפרש בתוצאות הדמיוניות לא אמיתי.</p>
+  ${rem.length ? `<h2 class="sec">המשחקים שנשארו</h2>${[...byRound].map(([r, gs]) => `<div class="card pad wi-round"><h3>מחזור ${esc(r)}</h3>${gs.map(g => `<div class="wi-g">${pick(g, "h")}<span class="small muted">${esc(fmtDM(g.date))}</span>${pick(g, "a")}</div>`).join("")}</div>`).join("")}`
+    : `<div class="card pad muted">אין משחקים שנשארו.</div>`}`;
 }
 
 function pageStandings() {
@@ -1890,6 +2044,21 @@ function openPlayerGame(gid, pid) {
   modal(html, (m) => m.classList.add("wide"));
 }
 
+// אולם: של המשחק (אם הוזן) או אולם הבית של הקבוצה המארחת
+function venueOf(g) {
+  if (g.venue || g.venueAddr) return { name: g.venue || "", addr: g.venueAddr || "" };
+  const H = team(g.homeId); return H && (H.venue || H.venueAddr) ? { name: H.venue || "", addr: H.venueAddr || "" } : null;
+}
+function mapLinks(v) {
+  if (!v) return "";
+  const isUrl = /^https?:\/\//i.test(v.addr), q = encodeURIComponent([v.name, isUrl ? "" : v.addr].filter(Boolean).join(", "));
+  const g = isUrl ? v.addr : `https://www.google.com/maps/search/?api=1&query=${q}`;
+  return `<a class="btn sm" href="${esc(g)}" target="_blank" rel="noopener">🗺️ Google Maps</a>${q && (!isUrl || v.name) ? `<a class="btn sm" href="https://waze.com/ul?q=${q}&navigate=yes" target="_blank" rel="noopener">🚗 Waze</a>` : ""}`;
+}
+function venueCard(v, label) {
+  if (!v) return "";
+  return `<div class="card pad sec venue"><div><span class="small muted">${label}</span><b>📍 ${esc(v.name || "אולם")}</b>${v.addr && !/^https?:/i.test(v.addr) ? `<span class="small muted">${esc(v.addr)}</span>` : ""}</div><div class="row-actions">${mapLinks(v)}</div></div>`;
+}
 function pageGame(id) {
   const g = game(id); if (!g) return `<div class="card empty">המשחק לא נמצא</div>`;
   const H = team(g.homeId), A = team(g.awayId), fin = isFinal(g);
@@ -1900,7 +2069,7 @@ function pageGame(id) {
   };
   return `${canStats() && g.pubSnap ? `<div class="draft-bar"><div><b>✏️ אתה רואה את הטיוטה של המשחק.</b> כולם עדיין רואים את הגרסה הקודמת.</div><div class="row-actions"><a class="btn sm" href="#/admin/game/${g.id}">לעריכה ולפרסום</a></div></div>` : ""}
   <div class="card">
-    <div class="pad split small muted" style="padding-bottom:0"><span>${g.round ? `מחזור ${esc(g.round)} · ` : ""}${fmtDate(g.date)}${g.time ? " · " + esc(g.time) : ""}${g.venue ? " · " + esc(g.venue) : ""}</span>${statusChip(g)}</div>
+    <div class="pad split small muted" style="padding-bottom:0"><span>${g.round ? `מחזור ${esc(g.round)} · ` : ""}${fmtDate(g.date)}${g.time ? " · " + esc(g.time) : ""}${venueOf(g)?.name ? " · " + esc(venueOf(g).name) : ""}</span>${statusChip(g)}</div>
     <div class="sb">
       <div class="tm">${badge(H, { lg:true, noName:true })}<b>${H ? `<a href="#/team/${H.id}">${esc(H.name)}</a>` : "—"}</b><span class="small muted">בית</span></div>
       <div class="score">${isN(g.homeScore) || isN(g.awayScore) ? `<span class="${!fin || hw ? "w" : "l"}">${g.homeScore ?? "-"}</span><em>:</em><span class="${!fin || !hw ? "w" : "l"}">${g.awayScore ?? "-"}</span>` : `<em>VS</em>`}</div>
@@ -1908,11 +2077,13 @@ function pageGame(id) {
     </div>
     ${top(g.homeId) || top(g.awayId) ? `<div class="pad split small" style="border-top:1px solid var(--line)"><span>${top(g.homeId) || "—"}</span><span>${top(g.awayId) || "—"}</span></div>` : ""}
   </div>
+  ${venueCard(venueOf(g), "איפה המשחק")}
   ${g.notes ? `<div class="card pad sec small">${esc(g.notes)}</div>` : ""}
   ${!fin && !isN(g.homeScore) && !isN(g.awayScore) ? preGame(g) : ""}
   ${(() => { const q = gameQuarterTable(g); return q ? `<section class="sec"><div class="sec-h"><h2>נקודות לפי רבע</h2></div>${q}</section>` : ""; })()}
   ${(() => { const t = gameTeamStatsTable(g); return t ? `<section class="sec"><div class="sec-h"><h2>סטטיסטיקה קבוצתית</h2></div>${t}</section>` : ""; })()}
   ${teamCompare(g)}
+  ${h2hSection(g)}
   ${Object.keys(g.box || {}).length ? `<div class="toolbar sec" style="margin-bottom:0"><span class="small muted">בוקס סקור:</span><div class="seg">${[["basic","בסיסי"],["full","מלא – כל הנתונים"]].map(([k, l]) => `<button class="${(ui.boxView === "basic" ? "basic" : "full") === k ? "on" : ""}" data-act="boxView" data-v="${k}">${l}</button>`).join("")}</div></div>` : ""}
   ${!fin && !Object.keys(g.box || {}).length && !(g.shots || []).length ? "" : `
   <section class="sec"><div class="sec-h"><h2>${badge(H)}</h2></div>${H ? boxTable(g, H.id) : ""}</section>
@@ -1921,9 +2092,18 @@ function pageGame(id) {
   ${H ? acc("gm-shots-h", "מפת זריקות – " + esc(tn(H)), shotBody(shotsFor({ gid: g.id, tid: H.id })), { icon:"" }) : ""}
   ${A ? acc("gm-shots-a", "מפת זריקות – " + esc(tn(A)), shotBody(shotsFor({ gid: g.id, tid: A.id })), { icon:"" }) : ""}
   </div>`}
-  <div class="row-actions sec"><button class="btn" data-act="shareChat" data-t="game" data-id="${g.id}">💬 שתף בצ'אט</button>${canStats() ? `<a class="btn" href="#/admin/game/${g.id}">✏️ עריכת המשחק</a>` : ""}</div>`;
+  <div class="row-actions sec"><button class="btn" data-act="shareChat" data-t="game" data-id="${g.id}">💬 שתף בצ'אט</button><button class="btn" data-act="gameLink" data-id="${g.id}">🔗 שלח קישור</button>${canStats() ? `<a class="btn" href="#/admin/game/${g.id}">✏️ עריכת המשחק</a>` : ""}</div>`;
 }
 
+// מפגשים קודמים בין שתי הקבוצות
+function h2hSection(g) {
+  const ids = [g.homeId, g.awayId], prev = sortedGames().filter(x => x.id !== g.id && isFinal(x) && ids.includes(x.homeId) && ids.includes(x.awayId));
+  if (!prev.length) return "";
+  const winsOf = (tid) => prev.filter(x => (x.homeId === tid ? x.homeScore > x.awayScore : x.awayScore > x.homeScore)).length;
+  const H = team(g.homeId), A = team(g.awayId);
+  return `<section class="sec"><div class="sec-h"><h2>מפגשים קודמים</h2><span class="small muted">${esc(tn(H))} <b dir="ltr">${winsOf(g.homeId)}-${winsOf(g.awayId)}</b> ${esc(tn(A))}</span></div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">${prev.slice().reverse().map(gameCard).join("")}</div></section>`;
+}
 // השוואת קבוצות במשחק – רק נתונים שהוזנו לשתי הקבוצות
 function teamCompare(g) {
   const H = team(g.homeId), A = team(g.awayId); if (!H || !A) return "";
@@ -2061,6 +2241,7 @@ function pageTeam(id) {
       ${["reb","ast","stl"].filter(k => isN(tAvg[k])).map(k => `<div class="kpi"><b>${f1(tAvg[k])}</b><span>${SL[k].l} למשחק</span></div>`).join("")}
     </div>
   </div>
+  ${t.venue || t.venueAddr ? venueCard({ name: t.venue || "", addr: t.venueAddr || "" }, "אולם הבית") : ""}
   <div class="accs sec">
   ${acc("tm-players", "שחקנים", sTable("team-" + id, pruneCols(playerCols(false), rows), rows, "pts"), { sub:"ממוצעים למשחק · לחץ על כותרת למיון", open:true, icon:"" })}
   ${full ? (() => { const ta = aggRows(teamRows(id)); const tbl = shootingTable(ta, false); return acc("tm-shoot", "קליעות של הקבוצה", tbl ? `${tbl}<div style="margin-top:12px">${ptsFromBar(ta)}</div>` : "", { sub:"נכנסו, הוחטאו ואחוזים", icon:"🏀" }); })() : ""}
@@ -2071,6 +2252,25 @@ function pageTeam(id) {
   </div>`;
 }
 
+/* ================= תגים (מעט, רק הישגים אמיתיים) ================= */
+const BADGES = [
+  ["b20", "🔥", "20+ נקודות", "20 נקודות או יותר במשחק", r => val(r, "pts") >= 20, true],
+  ["b30", "💥", "30+ נקודות", "30 נקודות או יותר במשחק", r => val(r, "pts") >= 30, true],
+  ["b3", "🎯", "צלף", "3 שלשות או יותר במשחק", r => (r.fg3m || 0) >= 3],
+  ["dd", "💎", "דאבל-דאבל", "10+ בשני נתונים באותו משחק", r => ["pts","reb","ast","stl","blk"].filter(k => val(r, k) >= 10).length >= 2],
+  ["blk", "🧱", "חומה", "3 חסימות או יותר במשחק", r => (r.blk || 0) >= 3],
+];
+function playerBadges(p) {
+  const log = playerLog(p.id).filter(x => isFinal(x.g)), po = ptsOnly(p), out = [];
+  for (const [k, ic, l, d, fn, ptsB] of BADGES) { if (po && !ptsB) continue; const n = log.filter(x => { try { return fn(x.r); } catch { return false; } }).length; if (n) out.push({ k, ic, l, d, n }); }
+  const mv = roundMvps().filter(x => x.done && x.best.p.id === p.id).length;
+  if (mv) out.push({ k:"mvp", ic:"⭐", l:"שחקן המחזור", d:"נבחר לשחקן המחזור", n:mv });
+  return out;
+}
+function badgesRow(p) {
+  const b = playerBadges(p); if (!b.length) return "";
+  return `<div class="badges sec">${b.map(x => `<span class="bdg" title="${esc(x.d)}"><i>${x.ic}</i>${esc(x.l)}${x.n > 1 ? ` <b>×${x.n}</b>` : ""}</span>`).join("")}</div>`;
+}
 function pagePlayer(id) {
   const p = player(id); if (!p) return `<div class="card empty">השחקן לא נמצא</div>`;
   const t = team(p.teamId), a = playerAgg(id), log = playerLog(id);
@@ -2134,9 +2334,10 @@ function pagePlayer(id) {
     <div style="display:flex;gap:14px;align-items:center">
       <div class="jn" style="width:64px;height:64px;border-radius:18px;font-size:26px;background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</div>
       <div><h1 style="margin:0">${esc(p.name)}${myPlayer()?.id === p.id ? ` <span class="chip live">⭐ זה אתה</span>` : ""}</h1><div class="muted">${t ? badge(t, { full:true }) : ""}${a.manual ? ` <span class="badge">ממוצעים ידניים</span>` : ""}</div>
-        <div class="row-actions" style="margin-top:8px"><a class="btn sm" href="#/compare?a=${p.id}">⚖️ השווה עם שחקן אחר</a><button class="btn sm" data-act="shareChat" data-t="player" data-id="${p.id}">💬 שתף בצ'אט</button></div></div>
+        <div class="row-actions" style="margin-top:8px"><a class="btn sm" href="#/compare?p=${p.id}">⚖️ השווה עם שחקנים אחרים</a><button class="btn sm" data-act="shareChat" data-t="player" data-id="${p.id}">💬 שתף בצ'אט</button></div></div>
     </div>
   </div>
+  ${badgesRow(p)}
   <div class="grid g4 sec">${tiles}</div>
   ${a.ptsOnly ? `<p class="small muted">לשחקנים של קבוצות אחרות מוצגות רק נקודות.</p>` : ""}
   <div class="accs">
@@ -2522,7 +2723,8 @@ function adminGameEditor(id) {
       <label class="f">מחזור<input class="inp" data-gf="round" value="${esc(g.round ?? "")}"></label>
       <label class="f">תאריך<input class="inp" type="date" data-gf="date" value="${esc(g.date || "")}"></label>
       <label class="f">שעה${timeSel('data-gf="time"', g.time || "")}</label>
-      <label class="f">אולם<input class="inp" data-gf="venue" value="${esc(g.venue || "")}"></label>
+      <label class="f">אולם (ריק = אולם הבית)<input class="inp" data-gf="venue" value="${esc(g.venue || "")}" placeholder="${esc(team(g.homeId)?.venue || "")}"></label>
+      <label class="f">כתובת / קישור למפה<input class="inp" data-gf="venueAddr" value="${esc(g.venueAddr || "")}" placeholder="${esc(team(g.homeId)?.venueAddr || "")}"></label>
     </div>
     <label class="f" style="margin-top:12px">הערות<textarea class="inp" rows="2" data-gf="notes">${esc(g.notes || "")}</textarea></label>
     <p class="small muted" style="margin:10px 0 0">חובה רק התוצאה. נתוני שחקנים – רשות, ומה שתזין יופיע.</p>
@@ -2899,12 +3101,15 @@ const ACT = {
     const t = team(el.dataset.id);
     const v = await modal(`<h2>עריכת קבוצה</h2><form><div class="fgrid"><label class="f">שם<input class="inp" name="name" value="${esc(t.name)}" required></label>
       <label class="f">קיצור<input class="inp" name="short" maxlength="3" value="${esc(t.short || "")}"></label><label class="f">צבע<input class="inp" type="color" name="color" value="${esc(t.color)}"></label></div>
+      <div class="fgrid" style="margin-top:12px"><label class="f">אולם בית (שם)<input class="inp" name="venue" value="${esc(t.venue || "")}" placeholder="למשל: אולם הספורט שרת"></label>
+      <label class="f">כתובת או קישור למפה<input class="inp" name="venueAddr" value="${esc(t.venueAddr || "")}" placeholder="רחוב, עיר – או קישור מגוגל מפות"></label></div>
       <div class="f" style="margin-top:12px"><span>לוגו</span><div class="logo-pick"><span class="logo-prev">${okImg(t.logo) ? `<img src="${t.logo}" alt="">` : ""}</span>${logoInput()}
         ${okImg(t.logo) ? `<label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="removeLogo"> הסר לוגו</label>` : ""}</div></div>
       <div class="row-actions" style="margin-top:14px"><button class="btn pri">שמור</button><button type="button" class="btn" data-close="">ביטול</button></div></form>`,
       (m, close) => m.querySelector("form").addEventListener("submit", e => { e.preventDefault(); close(Object.fromEntries(new FormData(e.target))); }));
     if (!v || typeof v !== "object") return;
     Object.assign(t, { name: v.name.trim(), short: v.short.trim() || v.name.trim().slice(0, 2), color: v.color });
+    for (const k of ["venue", "venueAddr"]) { const x = (v[k] || "").trim(); if (x) t[k] = x; else delete t[k]; }
     if (v.removeLogo) delete t.logo;
     else if (v.logo && v.logo.size) { try { t.logo = await readImage(v.logo); } catch { toast("לא הצלחתי לקרוא את התמונה"); } }
     commit();
@@ -2959,7 +3164,21 @@ const ACT = {
     if (!await confirmBox("למחוק את הטיוטה?", "כל מה שהכנסת בטיוטה יימחק. מה שכולם רואים לא משתנה.", "מחק טיוטה", true)) return;
     DRAFT = null; pickDB(); commit(); toast("הטיוטה נמחקה");
   },
-  cmpPick(el) { const q = qs(); el.value ? q.set(el.dataset.side, el.value) : q.delete(el.dataset.side); go("#/compare?" + q, true); },
+  cmpPick(el) { const q = qs(), m = el.dataset.m, ids = cmpList(q, m), i = +el.dataset.i;
+    if (el.value) ids[i] = el.value; else ids.splice(i, 1);
+    const n = new URLSearchParams(); if (m === "t") n.set("m", "t"); n.set(m, [...new Set(ids.filter(Boolean))].slice(0, CMP_MAX[m]).join(","));
+    if (m === "p" && q.get("t")) n.set("t", q.get("t")); if (m === "t" && (q.get("p") || q.get("a"))) n.set("p", cmpList(q, "p").join(","));
+    go("#/compare?" + n, true); },
+  cmpMode(el) { const q = qs(), n = new URLSearchParams(); if (el.dataset.v === "t") n.set("m", "t");
+    const p = cmpList(q, "p").join(","), t = cmpList(q, "t").join(","); if (p) n.set("p", p); if (t) n.set("t", t); go("#/compare" + (n.toString() ? "?" + n : ""), true); },
+  whatIf(el) { const g = el.dataset.g; WHATIF[g] = WHATIF[g] === el.dataset.v ? undefined : el.dataset.v; if (!WHATIF[g]) delete WHATIF[g]; render(true); },
+  whatIfReset() { for (const k of Object.keys(WHATIF)) delete WHATIF[k]; render(true); },
+  whatIfMine() { const mid = myTeamId(); for (const g of DB.games) if (!isFinal(g) && (g.homeId === mid || g.awayId === mid)) WHATIF[g.id] = g.homeId === mid ? "h" : "a"; render(true); },
+  async gameLink(el) { const g = game(el.dataset.id); if (!g) return;
+    const url = location.origin + location.pathname + "#/game/" + g.id, title = `${tn(team(g.homeId)) || ""} נגד ${tn(team(g.awayId)) || ""}`;
+    if (navigator.share) { try { await navigator.share({ title, url }); return; } catch (e) { if (e?.name === "AbortError") return; } }
+    try { await navigator.clipboard.writeText(url); toast("הקישור הועתק 🔗"); } catch { prompt("העתק את הקישור:", url); } },
+  search() { searchModal(); },
   draftView(el) { ui.viewDraft = el.dataset.v; saveUi(); pickDB(); render(true); },
   async gDraftStart(el) {
     const g = curGame(); if (!g || g.pubSnap) return; const kind = el.dataset.v;
@@ -3184,27 +3403,57 @@ const CMP_ROWS = [
   ["ריבאונדים", a => a.avg.reb, 1], ["ריב' התקפה", a => a.avg.oreb, 1], ["ריב' הגנה", a => a.avg.dreb, 1], ["אסיסטים", a => a.avg.ast, 1],
   ["חטיפות", a => a.avg.stl, 1], ["חסימות", a => a.avg.blk, 1], ["איבודים", a => a.avg.tov, -1], ["עבירות", a => a.avg.pf, -1], ["פלוס/מינוס", a => a.avg.pm, 1, v => sg(v)],
 ];
-function playerSelect(side, sel) {
+// השוואה: עד 5 שחקנים או עד 4 קבוצות
+const CMP_MAX = { p:5, t:4 };
+function cmpList(q, m) {
+  let ids = (q.get(m) || "").split(",").filter(Boolean);
+  if (m === "p" && !ids.length) ids = [q.get("a"), q.get("b")].filter(Boolean);   // קישורים ישנים ?a=&b=
+  return [...new Set(ids)].filter(id => m === "p" ? player(id) : team(id)).slice(0, CMP_MAX[m]);
+}
+function playerSelect(i, sel, taken) {
   const mid = myTeamId(), ts = [...DB.teams].sort((x, y) => (y.id === mid) - (x.id === mid) || tn(x).localeCompare(tn(y), "he"));
-  return `<select class="inp" data-act="cmpPick" data-side="${side}"><option value="">בחר שחקן…</option>${ts.map(t => `<optgroup label="${esc(tn(t))}">${roster(t.id).map(p => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(p.number ? p.number + " · " : "")}${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select>`;
+  return `<select class="inp" data-act="cmpPick" data-m="p" data-i="${i}"><option value="">${sel ? "✕ הסר" : "+ הוסף שחקן…"}</option>${ts.map(t => `<optgroup label="${esc(tn(t))}">${roster(t.id).filter(p => p.id === sel || !taken.includes(p.id)).map(p => `<option value="${p.id}" ${p.id === sel ? "selected" : ""}>${esc(p.number ? p.number + " · " : "")}${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select>`;
+}
+function teamSelect(i, sel, taken) {
+  return `<select class="inp" data-act="cmpPick" data-m="t" data-i="${i}"><option value="">${sel ? "✕ הסר" : "+ הוסף קבוצה…"}</option>${DB.teams.filter(t => t.id === sel || !taken.includes(t.id)).map(t => `<option value="${t.id}" ${t.id === sel ? "selected" : ""}>${esc(tn(t))}</option>`).join("")}</select>`;
+}
+function teamAvgs(tid) {
+  const done = sortedGames().filter(g => isFinal(g) && (g.homeId === tid || g.awayId === tid)), out = {};
+  if (ptsOnlyTeam(tid)) return out;
+  for (const k of ["reb","ast","stl","blk","tov"]) { const v = done.map(g => teamTotals(g, tid, true)[k]).filter(isN); out[k] = v.length ? sum(v) / v.length : undefined; }
+  return out;
+}
+const TCMP_ROWS = [
+  ["מקום", s => s.rank, -1], ["משחקים", s => s.gp, 0], ["ניצחונות", s => s.w, 1], ["הפסדים", s => s.l, -1], ["נק' בטבלה", s => s.lp, 1],
+  ["נק' זכות למשחק", s => s.ppg, 1], ["נק' חובה למשחק", s => s.oppg, -1], ["הפרש סלים", s => s.diff, 1, v => sg(v, 0)],
+  ["ניצחונות בבית", s => s.hw, 1], ["ניצחונות בחוץ", s => s.aw, 1], ["ב-5 אחרונים", s => s.last5.filter(x => x.r === "W").length, 1, v => v + "/5"],
+  ["ריבאונדים", s => s.av.reb, 1], ["אסיסטים", s => s.av.ast, 1], ["חטיפות", s => s.av.stl, 1], ["חסימות", s => s.av.blk, 1], ["איבודים", s => s.av.tov, -1],
+];
+function cmpTable(heads, rowsDef, objs) {
+  const rows = rowsDef.map(([l, fn, dir, fmt]) => {
+    const vs = objs.map(o => { try { return fn(o); } catch { return undefined; } }); if (!vs.some(isN)) return "";
+    const nums = vs.filter(isN), bestV = dir && nums.length > 1 ? (dir > 0 ? Math.max(...nums) : Math.min(...nums)) : undefined;
+    const allSame = nums.every(v => v === nums[0]);
+    return `<tr><th>${l}</th>${vs.map(v => `<td class="${isN(v) && v === bestV && !allSame ? "cmp-win" : ""}">${isN(v) ? (fmt || (x => Number.isInteger(x) ? x : f1(x)))(v) : "—"}</td>`).join("")}</tr>`;
+  }).join("");
+  return `<div class="card tbl-wrap"><table class="cmp-multi"><thead><tr><th></th>${heads.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function pageCompare(q) {
   if (!DB.players.length) return emptyLeague();
-  const ia = q.get("a") || "", ib = q.get("b") || "", pa = player(ia), pb = player(ib);
-  let body = `<div class="card pad muted">בחר שני שחקנים כדי להשוות ביניהם.</div>`;
-  if (pa && pb) {
-    const A = playerAgg(pa.id), B = playerAgg(pb.id);
-    const head = (p) => { const t = team(p.teamId); return `<div class="cmp-p"><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</span><b>${plink(p)}</b><small>${t ? badge(t) : ""}</small></div>`; };
-    const rows = CMP_ROWS.map(([l, fn, dir, fmt]) => {
-      const x = fn(A), y = fn(B); if (!isN(x) && !isN(y)) return "";
-      const f = fmt || f1, win = dir && isN(x) && isN(y) && x !== y ? ((x > y) === (dir > 0) ? "a" : "b") : "";
-      return `<tr><td class="${win === "a" ? "cmp-win" : ""}">${isN(x) ? f(x) : "—"}</td><th>${l}</th><td class="${win === "b" ? "cmp-win" : ""}">${isN(y) ? f(y) : "—"}</td></tr>`;
-    }).join("");
-    body = `<div class="card"><div class="cmp-head">${head(pa)}<span class="cmp-vs">VS</span>${head(pb)}</div><table class="cmp-tbl"><tbody>${rows}</tbody></table></div>
-      ${ptsOnly(pa) || ptsOnly(pb) ? `<p class="small muted" style="margin-top:8px">לשחקנים של קבוצות אחרות מוצגים רק נקודות וציון (שאר הנתונים שלהם חלקיים).</p>` : ""}
-      ${pa.id === pb.id ? `<p class="small muted">בחרת את אותו שחקן פעמיים 🙂</p>` : ""}`;
+  const m = q.get("m") === "t" ? "t" : "p", ids = cmpList(q, m);
+  const tabs = `<div class="seg" style="margin-bottom:10px"><button class="${m === "p" ? "on" : ""}" data-act="cmpMode" data-v="p">שחקנים (עד 5)</button><button class="${m === "t" ? "on" : ""}" data-act="cmpMode" data-v="t">קבוצות (עד 4)</button></div>`;
+  const sels = ids.map((id, i) => m === "p" ? playerSelect(i, id, ids) : teamSelect(i, id, ids));
+  if (ids.length < CMP_MAX[m]) sels.push(m === "p" ? playerSelect(ids.length, "", ids) : teamSelect(ids.length, "", ids));
+  let body = `<div class="card pad muted">בחר לפחות ${m === "p" ? "שני שחקנים" : "שתי קבוצות"} כדי להשוות.</div>`;
+  if (ids.length >= 2 && m === "p") {
+    const ps = ids.map(player), as = ps.map(p => playerAgg(p.id));
+    const heads = ps.map(p => { const t = team(p.teamId); return `<a href="#/player/${p.id}" class="cmp-h"><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</span><b>${esc(p.name)}</b></a>`; });
+    body = cmpTable(heads, CMP_ROWS, as) + (ps.some(ptsOnly) ? `<p class="small muted" style="margin-top:8px">לשחקנים של קבוצות אחרות מוצגים רק נקודות וציון.</p>` : "");
+  } else if (ids.length >= 2) {
+    const st = standings(), ss = ids.map(id => ({ ...st.find(x => x.t.id === id), av: teamAvgs(id) }));
+    body = cmpTable(ss.map(s => `<a href="#/team/${s.t.id}" class="cmp-h">${okImg(s.t.logo) ? `<img src="${s.t.logo}" alt="">` : `<span class="jn" style="background:${esc(s.t.color)};color:#fff">${esc(s.t.short || "")}</span>`}<b>${esc(tn(s.t))}</b></a>`), TCMP_ROWS, ss);
   }
-  return `<h1>השוואת שחקנים</h1><div class="cmp-pick">${playerSelect("a", ia)}<span class="cmp-vs">VS</span>${playerSelect("b", ib)}</div>${body}`;
+  return `<h1>השוואה</h1>${tabs}<div class="cmp-picks">${sels.join("")}</div>${body}<p class="small muted" style="margin-top:6px">ירוק = הכי טוב בשורה.</p>`;
 }
 
 /* ================= צ'אט =================
@@ -3747,6 +3996,7 @@ async function pushModal() {
   const v = await modal(`<h2>🔔 התראות</h2><form>
     <label class="check-row"><input type="checkbox" name="start" ${P.start ? "checked" : ""}> כשמשחק מתחיל</label>
     <label class="check-row"><input type="checkbox" name="final" ${P.final ? "checked" : ""}> כשמשחק נגמר (עם התוצאה)</label>
+    <label class="check-row"><input type="checkbox" name="remind" ${P.remind ? "checked" : ""}> ⏰ תזכורת שעה לפני המשחק</label>
     <div class="seg" style="margin:10px 0"><label><input type="radio" name="scope" value="all" ${all ? "checked" : ""}> כל המשחקים</label><label><input type="radio" name="scope" value="teams" ${all ? "" : "checked"}> רק הקבוצות שאבחר</label></div>
     <div class="push-teams">${DB.teams.map(t => `<label class="check-row"><input type="checkbox" name="t" value="${t.id}" ${P.teams?.includes(t.id) ? "checked" : ""}> ${badge(t, { link:false })}</label>`).join("")}</div>
     <h3 style="margin:14px 0 4px">💬 מהצ'אט</h3>
@@ -3756,7 +4006,7 @@ async function pushModal() {
     : `<p class="small muted">כדי לקבל התראות מהצ'אט צריך קודם להיכנס לצ'אט (לשונית צ'אט), ואז לחזור לכאן.</p>`}
     <div class="row-actions" style="margin-top:14px"><button class="btn pri">${P.on ? "שמור" : "הפעל התראות"}</button>${P.on ? `<button type="button" class="btn danger" data-close="off">כבה התראות</button>` : ""}<button type="button" class="btn" data-close>ביטול</button></div></form>`,
     (m, close) => m.querySelector("form").addEventListener("submit", e => { e.preventDefault(); const fd = new FormData(e.target);
-      close({ start:fd.has("start"), final:fd.has("final"), teams:fd.get("scope") === "all" ? [] : fd.getAll("t"), poll:fd.has("poll"), pin:fd.has("pin"), reply:fd.has("reply") }); }));
+      close({ start:fd.has("start"), final:fd.has("final"), remind:fd.has("remind"), teams:fd.get("scope") === "all" ? [] : fd.getAll("t"), poll:fd.has("poll"), pin:fd.has("pin"), reply:fd.has("reply") }); }));
   if (!v) return;
   try {
     const reg = await navigator.serviceWorker.register("sw.js");
@@ -3765,7 +4015,7 @@ async function pushModal() {
       if (s) { await fetch("/api/push/sub", { method:"DELETE", headers:{ "content-type":"application/json" }, body:JSON.stringify({ sub:s.toJSON() }) }); await s.unsubscribe(); }
       LS.set("league_push", JSON.stringify({ ...P, on:false })); render(true); return toast("ההתראות כבויות");
     }
-    if (!(v.start || v.final || v.poll || v.pin || v.reply)) return toast("לא בחרת כלום");
+    if (!(v.start || v.final || v.remind || v.poll || v.pin || v.reply)) return toast("לא בחרת כלום");
     if (await Notification.requestPermission() !== "granted") return toast("צריך לאשר התראות בדפדפן");
     const key = (await (await fetch("/api/push/key")).json()).key;
     let s = await reg.pushManager.getSubscription();
@@ -3899,6 +4149,7 @@ Object.assign(ACT, {
   async pollClose(el) { const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, closeNow:true } }); if (chatRes(res)) pollsLoad(); },
   async pollDel(el) { if (!await confirmBox("למחוק את הסקר?", "הסקר והתשובות יימחקו.", "מחק", true)) return; const res = await chatApi("POST", "/polls", { body:{ id:el.dataset.id, del:true } }); if (chatRes(res)) pollsLoad(); },
   setPalette(el) { LS.set("league_palette", el.dataset.v); applyTheme(); refreshPalButtons(); },
+  setIntro(el) { LS.set("league_intro", el.dataset.v); document.querySelectorAll("[data-act=setIntro]").forEach(b => b.classList.toggle("on", b.dataset.v === el.dataset.v)); playIntro(el.dataset.v); },
   setStyle(el) { LS.set("league_style", el.dataset.v); applyTheme(); refreshPalButtons(); },
   setMode(el) { LS.set("league_theme", el.dataset.v); applyTheme(); refreshPalButtons(); },
   pollAddOpt() { const box = $("#pollOpts"); if (!box || box.children.length >= 32) return; box.insertAdjacentHTML("beforeend", pollOptRow(box.children.length)); pollOptCount(); box.lastElementChild.querySelector("input").focus(); },
@@ -3933,9 +4184,9 @@ function navList() {
   return out;
 }
 // 6 לשוניות ראשיות, ובתוך חלק מהן לשוניות קטנות
-const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"]], players:[["players","שחקנים"],["leaders","מובילים"],["compare","השוואה"]],
+const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"],["whatif","מחשבון"]], players:[["players","שחקנים"],["leaders","מובילים"],["compare","השוואה"],["records","שיאים"]],
   myteam:[["myteam","סטטיסטיקה"],["training","אימונים"]], chat:[["chat","צ'אט"],["polls","סקרים"],["predict","ניחושים"],["people","אנשים", "mod"]] };
-const NAV_OF = { teams:"standings", leaders:"players", mvps:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
+const NAV_OF = { whatif:"standings", records:"players", teams:"standings", leaders:"players", mvps:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
 function render(keepFocus) {
   const hash = ROUTE.replace(/^#\/?/, "");
   const [pathPart] = hash.split("?"); const parts = pathPart.split("/").filter(Boolean); const q = qs();
@@ -3961,6 +4212,8 @@ function render(keepFocus) {
   else if (page === "myteam" || page === "stats") html = pageMyTeam();
   else if (page === "teams") html = pageTeams();
   else if (page === "compare") html = pageCompare(q);
+  else if (page === "records") html = pageRecords();
+  else if (page === "whatif") html = pageWhatIf();
   else if (page === "polls") html = pagePolls();
   else if (page === "predict") html = pagePredict(q);
   else if (page === "mvps") html = pageMvps();
@@ -4056,6 +4309,7 @@ function lookModal() {
     <div class="look-h">עיצוב</div><div class="st-row">${stBtn(STYLES[0])}</div>
     <div class="look-h">דוגמאות</div><div class="st-row">${STYLES.filter(s => s[3] === "p").map(stBtn).join("")}</div>
     <div class="look-h">ציורי רקע</div><div class="st-row">${STYLES.filter(s => s[3] === "d").map(stBtn).join("")}</div>
+    <div class="look-h">אנימציה בפתיחת האתר</div><div class="st-row">${INTROS.map(([id, nm]) => `<button type="button" class="st${id === (LS.get("league_intro") || "none") ? " on" : ""}" data-act="setIntro" data-v="${id}">${nm}</button>`).join("")}</div>
     <div class="look-h">רקע</div><div class="mode-row"><button type="button" class="btn${t !== "light" ? " on" : ""}" data-act="setMode" data-v="dark">🌙 כהה</button><button type="button" class="btn${t === "light" ? " on" : ""}" data-act="setMode" data-v="light">☀️ בהיר</button></div>
     <p class="small muted" style="margin:10px 0 0">נשמר רק אצלך.</p>
     <button class="btn pri" data-close style="margin-top:12px;width:100%">סגור</button>`);
@@ -4139,8 +4393,29 @@ function demoData() {
   return d;
 }
 
+/* ---- כפתור "למעלה" ---- */
+(() => { const b = document.createElement("button"); b.className = "top-fab"; b.setAttribute("aria-label", "חזרה למעלה"); b.innerHTML = "↑";
+  b.addEventListener("click", () => window.scrollTo({ top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+  document.body.appendChild(b); const upd = () => b.classList.toggle("show", window.scrollY > 700); addEventListener("scroll", upd, { passive:true }); upd(); })();
+
+/* ---- 14. אנימציית פתיחה: בלי / כדור לסל / שעון 24 ---- */
+const INTROS = [["none", "בלי"], ["hoop", "כדור לסל"], ["clock", "שעון 24"]];
+function playIntro(force) {
+  const kind = force || LS.get("league_intro") || "none";
+  if (kind === "none" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const o = document.createElement("div"); o.className = "intro intro--" + kind;
+  o.innerHTML = kind === "hoop"
+    ? `<div class="intro-stage"><svg class="intro-hoop" viewBox="0 0 120 110" fill="none" stroke="currentColor" stroke-linecap="round"><rect x="20" y="4" width="80" height="52" rx="4" stroke-width="3"/><rect x="45" y="26" width="30" height="22" stroke-width="2.5"/><ellipse cx="60" cy="58" rx="20" ry="4" stroke="var(--accent)" stroke-width="4"/><g class="intro-net" stroke-width="1.6"><path d="M41 60l6 34M49 61l3 33M57 62l1 32M63 62l-1 32M71 61l-3 33M79 60l-6 34M44 74h32M47 86h26"/></g></svg><span class="intro-ball"></span></div>`
+    : `<div class="intro-clock"><b>24</b><small>SHOT CLOCK</small></div>`;
+  document.body.appendChild(o);
+  const done = () => { o.classList.add("out"); setTimeout(() => o.remove(), 350); };
+  o.addEventListener("click", done);
+  if (kind === "clock") { let n = 24; const el = o.querySelector("b"); const iv = setInterval(() => { n -= 2; el.textContent = Math.max(0, n); if (n <= 0) { clearInterval(iv); o.classList.add("buzz"); setTimeout(done, 380); } }, 45); }
+  else setTimeout(done, 1500);
+}
 /* ================= הפעלה ================= */
 applyTheme();
+playIntro();
 load().then(() => { render();
   if (!meGet()) setTimeout(() => meModal(false), 300);
   else if (MODE === "server" && chatTok() && Date.now() - (+LS.get("league_me_ts") || 0) > 6 * 3600e3) identify({}).then(r => { if (r.ok) render(true); else if (r.error === "blocked") { CHAT.err = CHAT_ERR.blocked; } });
