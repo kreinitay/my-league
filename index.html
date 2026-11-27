@@ -811,11 +811,15 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .srch-res a small{color:var(--muted);margin-inline-start:auto;font-size:12px}
 .srch-res .jn{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
 /* ===== למעלה ===== */
-.top-fab{position:fixed;inset-inline-end:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:45;width:42px;height:42px;border-radius:50%;
+.srch-fab{position:fixed;left:14px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:45;width:48px;height:48px;border-radius:50%;border:0;
+  background:var(--accent);color:#fff;font-size:20px;display:grid;place-items:center;box-shadow:0 6px 18px -6px rgba(0,0,0,.45);cursor:pointer}
+.srch-fab:active{transform:scale(.94)}
+@media(min-width:860px){.srch-fab{bottom:24px}}
+.top-fab{position:fixed;left:17px;bottom:calc(142px + env(safe-area-inset-bottom));z-index:45;width:42px;height:42px;border-radius:50%;
   border:1px solid var(--line);background:var(--card);color:var(--text);font-size:20px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);
   opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s}
 .top-fab.show{opacity:1;pointer-events:auto;transform:none}
-@media(min-width:860px){.top-fab{bottom:24px}}
+@media(min-width:860px){.top-fab{bottom:82px}}
 /* ===== אנימציית פתיחה ===== */
 .intro{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;transition:opacity .35s}
 .intro.out{opacity:0}
@@ -885,6 +889,73 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
 .tv-st .sb-switch{background:#151b2b;border-color:#273049;color:#c3cad8}
 @media(max-width:420px){.tv-q{display:none}.led-main>b{font-size:48px}}
 
+
+/* ===== ליטוש: מעברים, טעינה ותגובה למגע ===== */
+@keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#app.pg-in>*{animation:pgIn .38s cubic-bezier(.2,.8,.25,1) both}
+#app.pg-in>*:nth-child(2){animation-delay:.04s}#app.pg-in>*:nth-child(3){animation-delay:.08s}
+#app.pg-in>*:nth-child(4){animation-delay:.12s}#app.pg-in>*:nth-child(5){animation-delay:.16s}#app.pg-in>*:nth-child(n+6){animation-delay:.2s}
+#app.pg-in table tbody tr{animation:pgIn .35s both}
+#app.pg-in table tbody tr:nth-child(-n+12){animation-delay:calc(var(--i,0) * 1ms)}
+/* טוען */
+.skel{display:flex;flex-direction:column;gap:12px;padding-top:6px}
+.skel i{display:block;height:84px;border-radius:var(--r);background:linear-gradient(90deg,var(--card) 25%,var(--card2) 50%,var(--card) 75%);background-size:300% 100%;animation:skel 1.2s linear infinite;border:1px solid var(--line)}
+.skel i:first-child{height:150px}.skel i:nth-child(3){height:120px}
+.skel .sk-ball{align-self:center;width:34px;height:34px;border-radius:50%;margin:8px 0;background:radial-gradient(circle at 35% 35%,#ffb15e,#e8670f 60%,#a8440a);animation:skBounce .6s cubic-bezier(.5,0,.5,1) infinite alternate}
+@keyframes skel{to{background-position:-300% 0}}
+@keyframes skBounce{from{transform:translateY(-14px)}to{transform:translateY(6px) scale(1.08,.92)}}
+/* תגובה ללחיצה */
+.btn,.card.gc,a.card,a.tile,.bnav a,.subtabs a,.srch-fab,.icon-btn{transition:transform .15s ease,box-shadow .2s ease,border-color .2s ease,background-color .2s ease}
+.btn:active,a.card:active,a.tile:active,.subtabs a:active,.icon-btn:active{transform:scale(.97)}
+@media(hover:hover){a.card:hover,a.tile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));box-shadow:0 10px 24px -14px color-mix(in srgb,var(--accent) 60%,transparent)}}
+/* ניווט תחתון: סימון פעיל */
+.bnav a{position:relative}
+.bnav a::before{content:"";position:absolute;top:2px;left:50%;width:44px;height:30px;margin-left:-22px;border-radius:999px;background:color-mix(in srgb,var(--accent) 16%,transparent);transform:scale(.4);opacity:0;transition:transform .28s cubic-bezier(.3,1.5,.5,1),opacity .2s;z-index:-1}
+.bnav a.on::before{transform:none;opacity:1}
+.bnav a.on svg,.bnav a.on .nav-logo{animation:navPop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes navPop{40%{transform:translateY(-3px) scale(1.12)}}
+/* כותרת עליונה מקבלת צל בגלילה */
+.top{transition:box-shadow .25s}.top.scrolled{box-shadow:0 8px 20px -14px rgba(0,0,0,.45)}
+/* חלונות קופצים */
+.modal-bg{animation:mbg .2s ease both}.modal-bg>.modal{animation:mIn .28s cubic-bezier(.2,.9,.3,1.15) both}
+@keyframes mbg{from{opacity:0}}@keyframes mIn{from{opacity:0;transform:translateY(16px) scale(.96)}}
+/* מספרים גדולים */
+.kpi b,.st-tile b{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){#app.pg-in>*,#app.pg-in table tbody tr,.modal-bg,.modal-bg>.modal,.bnav a.on svg,.skel i,.skel .sk-ball{animation:none!important}a.card:hover,a.tile:hover{transform:none}}
+.hero.my-hero h1,.hero h1{font-size:clamp(20px,5.6vw,30px);line-height:1.15;text-wrap:balance}
+:root[data-palette="teal"]:not([data-theme="light"]){--bg:#031414;--bg2:#061c1c;--card:#0a2626;--card2:#0f3232;--line:#1a4646;--text:#eafffb;--muted:#93c7c0;--dim:#5a8f88;--accent:#19d3b5;--accent2:#7eeedd;--accent-ink:#01201b}
+:root[data-palette="teal"][data-theme="light"]{--bg:#effaf8;--bg2:#e1f3ef;--card:#ffffff;--card2:#f2fbf9;--line:#cfe9e3;--text:#08302a;--muted:#4b7a72;--dim:#86ada6;--accent:#0f9e87;--accent2:#3cc3ad;--accent-ink:#ffffff}
+:root[data-palette="sky"]:not([data-theme="light"]){--bg:#04111a;--bg2:#061823;--card:#0a2130;--card2:#0e2b3e;--line:#1a4560;--text:#ecf8ff;--muted:#94bcd4;--dim:#5b8199;--accent:#38c7ff;--accent2:#9be2ff;--accent-ink:#00141f}
+:root[data-palette="sky"][data-theme="light"]{--bg:#f0f9ff;--bg2:#e0f2fd;--card:#ffffff;--card2:#f3fbff;--line:#cbe7f7;--text:#062a3e;--muted:#4a7590;--dim:#86a9be;--accent:#0388c9;--accent2:#36a9e0;--accent-ink:#ffffff}
+:root[data-palette="pink"]:not([data-theme="light"]){--bg:#12060d;--bg2:#1a0913;--card:#230d1a;--card2:#2e1222;--line:#4a1f38;--text:#ffeef7;--muted:#d29cbb;--dim:#93637f;--accent:#ff4fa3;--accent2:#ff9ccb;--accent-ink:#24000f}
+:root[data-palette="pink"][data-theme="light"]{--bg:#fdf2f7;--bg2:#f9e6ef;--card:#ffffff;--card2:#fff5fa;--line:#f2d3e2;--text:#3a0a22;--muted:#8c5571;--dim:#c094aa;--accent:#d6246f;--accent2:#ec5f9b;--accent-ink:#ffffff}
+:root[data-palette="yellow"]:not([data-theme="light"]){--bg:#0f0d04;--bg2:#161305;--card:#1e1a08;--card2:#28220b;--line:#433a14;--text:#fffbe8;--muted:#d1c48f;--dim:#8f8455;--accent:#ffd21f;--accent2:#ffe680;--accent-ink:#1d1600}
+:root[data-palette="yellow"][data-theme="light"]{--bg:#fbf9ee;--bg2:#f4efd9;--card:#ffffff;--card2:#fdfbf1;--line:#ebe3bf;--text:#2b2405;--muted:#7a6d34;--dim:#b0a46e;--accent:#b98a00;--accent2:#dcae1d;--accent-ink:#ffffff}
+:root[data-palette="lime"]:not([data-theme="light"]){--bg:#070f04;--bg2:#0b1606;--card:#111f09;--card2:#17290d;--line:#2a4419;--text:#f3ffe8;--muted:#b0cf95;--dim:#72905b;--accent:#8be22d;--accent2:#c2f58a;--accent-ink:#0d1a00}
+:root[data-palette="lime"][data-theme="light"]{--bg:#f5fbef;--bg2:#eaf5df;--card:#ffffff;--card2:#f7fcf2;--line:#dbecc8;--text:#1c2e0a;--muted:#5e7a42;--dim:#98b07f;--accent:#4f9a0e;--accent2:#7cc23a;--accent-ink:#ffffff}
+:root[data-palette="coral"]:not([data-theme="light"]){--bg:#120807;--bg2:#1a0c0a;--card:#24110e;--card2:#2f1713;--line:#4d2620;--text:#fff2ef;--muted:#d6a39a;--dim:#95665e;--accent:#ff6f61;--accent2:#ffaba3;--accent-ink:#250402}
+:root[data-palette="coral"][data-theme="light"]{--bg:#fff5f3;--bg2:#fbe9e5;--card:#ffffff;--card2:#fff7f5;--line:#f3d6cf;--text:#3a120c;--muted:#8f584f;--dim:#c0918a;--accent:#e0483a;--accent2:#f27f73;--accent-ink:#ffffff}
+/* מראה: חלון ברור יותר */
+.look-prev{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--bg);border:1px solid var(--line);margin-bottom:6px}
+.look-prev .lp-card{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.look-prev .lp-card b{display:block;font-size:14px}.look-prev .lp-card small{color:var(--muted);font-size:12px}
+.look-prev .lp-btn{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:7px 12px;font-weight:700;font-size:13px}
+.look-prev .lp-num{font-size:22px;font-weight:800;color:var(--accent)}
+.look-sec{border-top:1px solid var(--line);padding-top:4px;margin-top:10px}
+.look-h b{color:var(--text);font-size:14px;margin-inline-end:6px}
+.sw-row{grid-template-columns:repeat(6,1fr);gap:8px 6px}
+.sw i{width:38px;height:38px;position:relative;transition:transform .15s}
+.sw.on i{box-shadow:0 0 0 2px var(--accent);transform:scale(1.08)}
+.sw.on i::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.sw.on{color:var(--text);font-weight:700}
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mode-row .btn{padding:9px 4px;font-size:13px}
+.mode-row .btn.on{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.look-note{font-size:12px;color:var(--dim);margin:4px 0 0}
+/* מצב טלפון במסך גדול */
+:root[data-device="phone"] .wrap{max-width:520px}
+:root[data-device="phone"] .topnav{display:none!important}
+:root[data-device="phone"] .bnav{display:flex!important;max-width:520px;margin:0 auto}
+:root[data-device="phone"] body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 </style>
 </head>
 <body>
@@ -901,7 +972,7 @@ tr.mine td.sticky-col{background:color-mix(in srgb,var(--text) 5%,var(--card));b
     <a class="iconbtn" id="adminBtn" href="#/admin" title="ניהול" aria-label="ניהול"></a>
   </div>
 </header>
-<main class="wrap" id="app"><div class="empty"><div class="big">🏀</div>טוען…</div></main>
+<main class="wrap" id="app"><div class="skel" aria-label="טוען"><span class="sk-ball"></span><i></i><i></i><i></i><i></i></div></main>
 <footer class="wrap src-note">
   <p>מקור הנתונים: הנתונים של כל הקבוצות האחרות לקוחים מ-<bdi dir="ltr">Swish+</bdi>. המשחקים של מכבי פרדס חנה שרת הוזנו ידנית על ידי יוצר האתר (חוץ מהמשחק הראשון נגד הפועל ג'סר א-זרקא והמשחק נגד מכבי מי עמי, שלקוחים מ-<bdi dir="ltr">Swish+</bdi>).</p>
   <p dir="ltr">Data source: stats for all other teams come from Swish+. Maccabi Pardes Hanna Sharet games were entered manually by the site's creator (except the first game vs. Hapoel Jisr az-Zarqa and the game vs. Maccabi Mei Ami, which are from Swish+).</p>
@@ -945,7 +1016,7 @@ let PUB = null, DRAFT = null;   // PUB = מה שכולם רואים · DRAFT = �
 function setData(d) { const n = normalize(d); const dr = n.draft; delete n.draft; PUB = n; DRAFT = dr ? normalize(dr) : null; pickDB(); }
 function pickDB() { DB = isAdminL() && DRAFT && ui.viewDraft !== "pub" ? DRAFT : PUB; if (!canStats()) DB = pubView(DB); }
 /* טיוטה של משחק בודד: המשחק עצמו מחזיק את הגרסה של המנהל, ו-pubSnap שומר את מה שכולם רואים עד "פרסם" */
-const GD_FIELDS = ["homeScore","awayScore","status","box","shots","teamStats","liveQ"];
+const GD_FIELDS = ["homeScore","awayScore","status","box","shots","teamStats","liveQ","liveClock"];
 const clone = (x) => JSON.parse(JSON.stringify(x));
 function snapOf(g) { const o = {}; for (const k of GD_FIELDS) if (g[k] !== undefined) o[k] = clone(g[k]); return o; }
 function viewSnap(g) {
@@ -1345,8 +1416,16 @@ function badge(t, opts = {}) {
 function plink(p, cls = "") { return p ? `<a class="${cls}" href="#/player/${p.id}">${esc(p.name)}</a>` : "—"; }
 function statusChip(g) {
   if (isFinal(g)) return `<span class="chip final">סופי</span>`;
-  if (g.status === "live") return `<span class="chip live">● ${g.liveQ >= 1 && g.liveQ <= 4 ? `רבע ${g.liveQ} – ` : ""}משוחק עכשיו</span>`;
+  if (g.status === "live") return `<span class="chip live">● ${g.liveQ >= 1 && g.liveQ <= 4 ? `רבע ${g.liveQ}${g.liveClock ? ` · <bdi dir="ltr">${esc(g.liveClock)}</bdi>` : ""} – ` : ""}חי</span>`;
   return `<span class="chip">${g.time ? esc(g.time) : "טרם שוחק"}</span>`;
+}
+function nextGameBlock(id, key) {
+  const gs = sortedGames().filter(g => g.homeId === id || g.awayId === id);
+  if (!gs.length) return "";
+  const nx = gs.find(g => !isFinal(g));
+  return `<section class="sec next-blk"><div class="sec-h"><h2>${nx ? "המשחק הבא" : "העונה נגמרה"}</h2></div>
+    ${nx ? `<div class="grid g3">${gameCard(nx)}</div>` : ""}
+    <button class="btn sm" data-act="allGames" data-k="${key}" style="margin-top:8px">📅 כל המשחקים (${gs.length})</button></section>`;
 }
 function gameCard(g) {
   const H = team(g.homeId), A = team(g.awayId), fin = isFinal(g);
@@ -1871,17 +1950,36 @@ function pageHome() {
 }
 
 /* ================= חיפוש מהיר ================= */
+const SRCH_PAGES = [
+  ["", "🏠", "בית", "ראשי דף הבית"], ["standings", "📊", "טבלת הליגה", "טבלה מקום דירוג"], ["teams", "🛡️", "קבוצות", "כל הקבוצות"],
+  ["whatif", "🧮", "מחשבון טבלה", "מה אם חישוב"], ["games", "📅", "משחקים", "לוח משחקים תוצאות מחזור"], ["players", "👟", "שחקנים", "כל השחקנים"],
+  ["records", "🏆", "מובילים ושיאים", "מובילים שיאים קלעים נקודות שלשות ציון"], ["compare", "⚖️", "השוואה", "השוואת שחקנים קבוצות"],
+  ["mvps", "⭐", "שחקני המחזור", "mvp מצטיין"], ["myteam", "💪", "הקבוצה שלי", "סטטיסטיקה שלנו ריבאונדים אסיסטים"],
+  ["training", "🏋️", "אימונים", "אימון"], ["chat", "💬", "צ'אט", "הודעות"], ["polls", "🗳️", "סקרים", "סקר הצבעה"], ["predict", "🔮", "ניחושים", "ניחוש תוצאה"],
+];
 function searchModal() {
-  modal(`<h2>🔍 חיפוש</h2><input class="inp" id="srchIn" placeholder="שם שחקן, מספר או קבוצה" autocomplete="off"><div id="srchRes" class="srch-res"></div>`, (m) => {
+  modal(`<h2>🔍 חיפוש</h2><input class="inp" id="srchIn" placeholder="שחקן, מספר, קבוצה, משחק, מחזור או דף" autocomplete="off"><div id="srchRes" class="srch-res"></div>`, (m) => {
     const inp = m.querySelector("#srchIn"), out = m.querySelector("#srchRes");
     const norm = (x) => String(x || "").toLowerCase().replace(/["'׳״-]/g, "").replace(/\s+/g, " ").trim();
-    const run = () => { const v = norm(inp.value); if (!v) { out.innerHTML = ""; return; }
+    const pg = ([k, ic, l]) => `<a href="#/${k}" data-close><span class="jn">${ic}</span><b>${esc(l)}</b><small>דף</small></a>`;
+    const gl = (g) => `<a href="#/game/${g.id}" data-close><span class="jn">🏀</span><b>${esc(tn(team(g.homeId)) || "")} ${isFinal(g) ? `<span dir="ltr">${g.homeScore}-${g.awayScore}</span>` : "נגד"} ${esc(tn(team(g.awayId)) || "")}</b><small>${g.round ? "מחזור " + esc(g.round) + " · " : ""}${esc(fmtDM(g.date) || "")}</small></a>`;
+    const head = (t) => `<p class="small muted" style="margin:10px 0 2px">${t}</p>`;
+    const quick = () => { const mid = myTeamId(), nx = sortedGames().find(g => !isFinal(g) && (g.homeId === mid || g.awayId === mid));
+      return (nx ? head("המשחק הבא שלנו") + gl(nx) : "") + head("דפים") + SRCH_PAGES.slice(0, 8).map(pg).join(""); };
+    const run = () => { const v = norm(inp.value); if (!v) { out.innerHTML = quick(); return; }
+      const pages = SRCH_PAGES.filter(([, , l, kw]) => norm(l + " " + kw).includes(v)).slice(0, 5);
       const ts = DB.teams.filter(t => norm(t.name).includes(v)).slice(0, 4);
       const ps = DB.players.filter(p => norm(p.name).includes(v) || String(p.number) === v).slice(0, 12);
-      out.innerHTML = [...ts.map(t => `<a href="#/team/${t.id}" data-close>${badge(t, { link:false })}<small>קבוצה</small></a>`),
-        ...ps.map(p => { const t = team(p.teamId); return `<a href="#/player/${p.id}" data-close><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</span><b>${esc(p.name)}</b><small>${esc(tn(t) || "")}</small></a>`; })].join("")
-        || `<p class="muted small">לא נמצא כלום</p>`; };
-    inp.addEventListener("input", run);
+      const rn = v.match(/^(?:מחזור\s*)?(\d{1,2})$/);
+      let gs = rn ? sortedGames().filter(g => String(g.round) === rn[1]) : [];
+      if (!gs.length && ts.length) { const ids = new Set(ts.map(t => t.id)); const all = sortedGames().filter(g => ids.has(g.homeId) || ids.has(g.awayId));
+        const nxt = all.filter(g => !isFinal(g)).slice(0, 2), last = all.filter(isFinal).slice(-3).reverse(); gs = [...nxt, ...last]; }
+      const html = (pages.length ? head("דפים") + pages.map(pg).join("") : "")
+        + (ts.length ? head("קבוצות") + ts.map(t => `<a href="#/team/${t.id}" data-close>${badge(t, { link:false })}<small>קבוצה</small></a>`).join("") : "")
+        + (ps.length ? head("שחקנים") + ps.map(p => { const t = team(p.teamId); return `<a href="#/player/${p.id}" data-close><span class="jn" style="background:${esc(t?.color || "var(--card2)")};color:#fff">${esc(p.number ?? "")}</span><b>${esc(p.name)}</b><small>${esc(tn(t) || "")}</small></a>`; }).join("") : "")
+        + (gs.length ? head(rn ? "משחקי מחזור " + rn[1] : "משחקים") + gs.slice(0, 8).map(gl).join("") : "");
+      out.innerHTML = html || `<p class="muted small">לא נמצא כלום</p>`; };
+    inp.addEventListener("input", run); run(); setTimeout(() => inp.focus(), 50);
   });
 }
 /* ================= שיאי ליגה ================= */
@@ -2313,6 +2411,7 @@ function pageTeam(id) {
       ${["reb","ast","stl"].filter(k => isN(tAvg[k])).map(k => `<div class="kpi"><b>${f1(tAvg[k])}</b><span>${SL[k].l} למשחק</span></div>`).join("")}
     </div>
   </div>
+  ${nextGameBlock(id, "tm-games")}
   ${t.venue || t.venueAddr ? venueCard({ name: t.venue || "", addr: t.venueAddr || "" }, "אולם הבית") : ""}
   <div class="accs sec">
   ${acc("tm-players", "שחקנים", sTable("team-" + id, pruneCols(playerCols(false), rows), rows, "pts"), { sub:"ממוצעים למשחק · לחץ על כותרת למיון", open:true, icon:"" })}
@@ -2320,7 +2419,7 @@ function pageTeam(id) {
   ${full ? acc("tm-shots", "אזורים חמים ומפת זריקות", shotBody(shotsFor({ tid: id })), { icon:"" }) : ""}
   ${id === myTeamId() ? `<a class="btn pri" href="#/myteam" style="margin-top:4px">לכל הסטטיסטיקה של הקבוצה</a>` : ""}
   ${acc("tm-q", "נקודות לפי רבע", teamQuarterHtml(id), { sub:"כמה קלעו וספגו בכל רבע", icon:"⏱️" })}
-  ${acc("tm-games", "משחקים", `<div class="grid g3">${gs.map(gameCard).join("") || `<div class="card pad muted">אין משחקים</div>`}</div>`, { sub:`${gs.length} משחקים`, open:true, icon:"" })}
+  ${acc("tm-games", "משחקים", `<div class="grid g3">${gs.map(gameCard).join("") || `<div class="card pad muted">אין משחקים</div>`}</div>`, { sub:`${gs.length} משחקים`, icon:"" })}
   </div>`;
 }
 
@@ -2541,8 +2640,7 @@ function pageMyTeam() {
       ${wins.length ? statTile("נקודות בניצחון", f1(avg(wins, "f")), `ספגנו ${f1(avg(wins, "a"))}`) : ""}
       ${losses.length ? statTile("נקודות בהפסד", f1(avg(losses, "f")), `ספגנו ${f1(avg(losses, "a"))}`) : ""}
     </div>
-    ${upcoming ? `<a class="card pad next-g" href="#/game/${upcoming.id}"><span class="small muted">המשחק הבא · ${esc(fmtDate(upcoming.date))}${upcoming.time ? " · " + esc(upcoming.time) : ""}</span>
-      <div class="split" style="margin-top:6px">${badge(team(upcoming.homeId), { link:false })}<b class="dim">נגד</b>${badge(team(upcoming.awayId), { link:false })}</div></a>` : ""}` : "";
+` : "";
 
   // ---- 2. מובילי הקבוצה ----
   const mvp = best(aggs.filter(x => isN(x.a.avg.rate) && x.a.n.rate >= Math.min(2, res.length)), x => x.a.avg.rate) || best(aggs.filter(x => isN(x.a.eff) && x.a.n.eff >= Math.min(2, res.length)), x => x.a.eff) || best(aggs.filter(x => isN(x.a.avg.pts)), x => x.a.avg.pts);
@@ -2594,6 +2692,7 @@ function pageMyTeam() {
       ${S ? `<div class="muted">מקום ${S.rank} מתוך ${st.length} · ${S.w}-${S.l} · ${S.lp} נק' בטבלה</div>` : ""}</div>
       ${S ? formDots(S.last5) : ""}</div>
   </div>
+  ${nextGameBlock(mid, "st-games")}
   <div class="accs">
     ${acc("st-my", "סיכום העונה", summary, { sub:"מאזן, נקודות, ניצחונות והפסדים", open:true, icon:"" })}
     ${acc("st-rate", "ציונים", ratesHtml, { sub:"ציון 1-10 לכל שחקן ולקבוצה בכל משחק", open:true, icon:"" })}
@@ -3056,6 +3155,12 @@ const ACT = {
   apfilter(el) { const q = new URLSearchParams(); q.set("team", el.value); go("#/admin/players?" + q); },
   minG(el) { const q = qs(); q.set("min", el.dataset.v); setQ("records", q); },
   logout() { logout(); },
+  allGames(el) {
+    const k = el.dataset.k; ui.acc ||= {}; ui.acc[k] = true; saveUi();
+    const sec = document.querySelector(`.acc[data-key="${k}"]`); if (!sec) return;
+    sec.classList.add("open"); sec.querySelector(".acc-h")?.setAttribute("aria-expanded", true);
+    setTimeout(() => sec.scrollIntoView({ behavior:"smooth", block:"start" }), 60);
+  },
   acc(el) {
     const sec = el.closest(".acc"), k = sec.dataset.key, open = !sec.classList.contains("open");
     sec.classList.toggle("open", open); el.setAttribute("aria-expanded", open);
@@ -4227,6 +4332,9 @@ Object.assign(ACT, {
   setIntro(el) { LS.set("league_intro", el.dataset.v); document.querySelectorAll("[data-act=setIntro]").forEach(b => b.classList.toggle("on", b.dataset.v === el.dataset.v)); playIntro(el.dataset.v); },
   setStyle(el) { LS.set("league_style", el.dataset.v); applyTheme(); refreshPalButtons(); },
   setMode(el) { LS.set("league_theme", el.dataset.v); applyTheme(); refreshPalButtons(); },
+  setDevice(el) { LS.set("league_device", el.dataset.v); applyDevice(); refreshPalButtons(); },
+  lookReset() { ["league_theme","league_palette","league_style","league_device","league_score","league_intro"].forEach(k => LS.set(k, "")); applyTheme(); refreshPalButtons();
+    document.querySelectorAll(".modal-bg").forEach(m => m.remove()); render(true); lookModal(); },
   pollAddOpt() { const box = $("#pollOpts"); if (!box || box.children.length >= 32) return; box.insertAdjacentHTML("beforeend", pollOptRow(box.children.length)); pollOptCount(); box.lastElementChild.querySelector("input").focus(); },
   pollRmOpt(el) { el.closest(".poll-opt")?.remove(); pollOptCount(); },
   trainEdit() { TRAIN.edit = !TRAIN.edit; render(true); },
@@ -4262,6 +4370,25 @@ function navList() {
 const SUBTABS = { standings:[["standings","טבלה"],["teams","קבוצות"],["whatif","מחשבון"]], players:[["players","שחקנים"],["records","מובילים ושיאים"],["compare","השוואה"]],
   myteam:[["myteam","סטטיסטיקה"],["training","אימונים"]], chat:[["chat","צ'אט"],["polls","סקרים"],["predict","ניחושים"],["people","אנשים", "mod"]] };
 const NAV_OF = { whatif:"standings", records:"players", teams:"standings", leaders:"players", mvps:"players", compare:"players", player:"players", training:"myteam", stats:"myteam", polls:"chat", predict:"chat", people:"chat", game:"games" };
+
+/* ===== אפקט כניסה לדף: הופעה הדרגתית ומספרים שעולים ===== */
+const RM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+function pageFx(app) {
+  if (RM()) return;
+  app.classList.remove("pg-in"); void app.offsetWidth; app.classList.add("pg-in");
+  app.querySelectorAll("table tbody").forEach(tb => [...tb.rows].slice(0, 12).forEach((r, i) => r.style.setProperty("--i", 40 + i * 30)));
+  clearTimeout(pageFx.t); pageFx.t = setTimeout(() => app.classList.remove("pg-in"), 900);
+  app.querySelectorAll(".kpi b, .st-tile b").forEach(el => {
+    if (el.children.length) return;
+    const m = el.textContent.trim().match(/^([+-]?)(\d+(?:\.\d+)?)(%?)$/); if (!m) return;
+    const to = +m[2], dec = (m[2].split(".")[1] || "").length; if (!to) return;
+    const t0 = performance.now(), dur = 650;
+    const step = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = m[1] + (to * e).toFixed(dec) + m[3]; if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+addEventListener("scroll", () => document.querySelector(".top")?.classList.toggle("scrolled", scrollY > 8), { passive:true });
 function render(keepFocus) {
   const hash = ROUTE.replace(/^#\/?/, "");
   const [pathPart] = hash.split("?"); const parts = pathPart.split("/").filter(Boolean); const q = qs();
@@ -4322,7 +4449,7 @@ function render(keepFocus) {
   const bb = $("#bellBtn"); if (bb) { bb.innerHTML = I.bell; bb.classList.toggle("admin-on", !!pushPrefs()?.on); }
   chatAfterRender();
   if (page === "admin" && parts[1] === "settings" && isAdminL()) { chatLoadCfg(); staffLoad(); }
-  if (ROUTE.split("?")[0] !== render.lastRoute && !keepFocus) window.scrollTo(0, 0);
+  if (ROUTE.split("?")[0] !== render.lastRoute && !keepFocus) { window.scrollTo(0, 0); pageFx(app); }
   render.lastRoute = ROUTE.split("?")[0];
 }
 // ניתוב פנימי – עובד גם כשהאתר פתוח בתוך חלון תצוגה מקדימה (שם קישורי # רגילים לא עובדים)
@@ -4360,7 +4487,8 @@ const DEFAULT_BALL = $("#brandIcon")?.innerHTML || "";
 // 4 ערכות צבעים: [מזהה, שם, צבעים לדוגמה]
 // מראה האתר: צבע × עיצוב (כל צבע עובד עם כל עיצוב)
 const PALETTES = [["orange", "כתום", "#ff7a1a"], ["purple", "סגול", "#a855f7"], ["mono", "שחור-לבן", "linear-gradient(135deg,#000 50%,#fff 50%)"],
-  ["red", "אדום", "#e11d2e"], ["blue", "כחול", "#1e7bf0"], ["green", "ירוק-זהב", "linear-gradient(135deg,#0f7a43 50%,#f5c542 50%)"]];
+  ["red", "אדום", "#e11d2e"], ["blue", "כחול", "#1e7bf0"], ["green", "ירוק-זהב", "linear-gradient(135deg,#0f7a43 50%,#f5c542 50%)"],
+  ["teal", "טורקיז", "#19c3a7"], ["sky", "תכלת", "#38bdf8"], ["pink", "ורוד", "#ec4899"], ["yellow", "צהוב", "#facc15"], ["lime", "ליים", "#84cc16"], ["coral", "אלמוג", "#ff6f61"]];
 const STYLES = [["classic", "רגיל (בלי עיצוב)", "", ""], ["chalk", "לוח טקטיקה", "Amatic+SC:wght@700", "p"], ["jersey", "גופייה", "Karantina:wght@700", "p"], ["street", "מגרש רחוב", "Rubik+Dirt", "p"],
   ["court", "מגרש", "Suez+One", "d"], ["arena", "ארנה", "Secular+One", "d"], ["hoop", "סל", "Fredoka:wght@700", "d"]];
 // כל עיצוב טוען רק את הגופן שלו
@@ -4368,8 +4496,15 @@ function loadThemeFont(st) {
   const f = st === "led" ? "Orbitron:wght@700;900" : STYLES.find(p => p[0] === st)?.[2]; if (!f || document.getElementById("font-" + st)) return;
   const l = document.createElement("link"); l.id = "font-" + st; l.rel = "stylesheet"; l.href = `https://fonts.googleapis.com/css2?family=${f}&display=swap`; document.head.appendChild(l);
 }
+function applyDevice() {
+  const d = LS.get("league_device") || "auto", vp = document.querySelector('meta[name="viewport"]');
+  document.documentElement.dataset.device = d;
+  if (vp) vp.content = d === "pc" && screen.width < 860 ? "width=1100" : "width=device-width,initial-scale=1,viewport-fit=cover";
+}
+matchMedia("(prefers-color-scheme: light)").addEventListener?.("change", () => { const tm = LS.get("league_theme"); if (tm !== "light" && tm !== "dark") applyTheme(); });
 function applyTheme() {
-  const t = LS.get("league_theme") || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  const tm = LS.get("league_theme"), t = tm === "light" || tm === "dark" ? tm : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  applyDevice();
   const pal = PALETTES.some(p => p[0] === LS.get("league_palette")) ? LS.get("league_palette") : "orange";
   const st = STYLES.some(p => p[0] === LS.get("league_style")) ? LS.get("league_style") : "classic";
   document.documentElement.dataset.theme = t; document.documentElement.dataset.palette = pal; document.documentElement.dataset.style = st; loadThemeFont(st); $("#themeBtn").innerHTML = t === "light" ? I.moon : I.sun;
@@ -4377,26 +4512,55 @@ function applyTheme() {
 }
 // "מראה האתר": צבע + עיצוב + כהה/בהיר – חלון קטן מהכפתור למעלה
 function lookModal() {
-  const t = document.documentElement.dataset.theme, cur = document.documentElement.dataset.palette, cst = document.documentElement.dataset.style;
+  const cur = document.documentElement.dataset.palette, cst = document.documentElement.dataset.style;
+  const tm = LS.get("league_theme") === "light" || LS.get("league_theme") === "dark" ? LS.get("league_theme") : "auto", dv = LS.get("league_device") || "auto";
   const stBtn = ([id, nm]) => `<button type="button" class="st${id === cst ? " on" : ""}" data-act="setStyle" data-v="${id}">${nm}</button>`;
+  const opt = (act, v, on, l) => `<button type="button" class="btn${on ? " on" : ""}" data-act="${act}" data-v="${v}">${l}</button>`;
+  const sec = (title, note, body) => `<div class="look-sec"><div class="look-h"><b>${title}</b>${note}</div>${body}</div>`;
   modal(`<h2>🎨 מראה האתר</h2>
-    <div class="look-h">צבע</div><div class="sw-row">${PALETTES.map(([id, nm, c]) => `<button type="button" class="sw${id === cur ? " on" : ""}" data-act="setPalette" data-v="${id}"><i style="background:${c}"></i>${nm}</button>`).join("")}</div>
-    <div class="look-h">עיצוב</div><div class="st-row">${stBtn(STYLES[0])}</div>
-    <div class="look-h">דוגמאות</div><div class="st-row">${STYLES.filter(s => s[3] === "p").map(stBtn).join("")}</div>
-    <div class="look-h">ציורי רקע</div><div class="st-row">${STYLES.filter(s => s[3] === "d").map(stBtn).join("")}</div>
-    <div class="look-h">תצוגת התוצאה בדף משחק</div><div class="st-row">${SCORE_STYLES.map(([id, nm]) => `<button type="button" class="st${id === scoreStyle() ? " on" : ""}" data-act="setScore" data-v="${id}">${nm}</button>`).join("")}</div>
-    <div class="look-h">אנימציה בפתיחת האתר</div><div class="st-row">${INTROS.map(([id, nm]) => `<button type="button" class="st${id === (LS.get("league_intro") || "none") ? " on" : ""}" data-act="setIntro" data-v="${id}">${nm}</button>`).join("")}</div>
-    <div class="look-h">רקע</div><div class="mode-row"><button type="button" class="btn${t !== "light" ? " on" : ""}" data-act="setMode" data-v="dark">🌙 כהה</button><button type="button" class="btn${t === "light" ? " on" : ""}" data-act="setMode" data-v="light">☀️ בהיר</button></div>
-    <p class="small muted" style="margin:10px 0 0">נשמר רק אצלך.</p>
-    <button class="btn pri" data-close style="margin-top:12px;width:100%">סגור</button>`);
+    <div class="look-prev" aria-hidden="true"><div class="lp-card"><b>ככה זה ייראה</b><small>כל שינוי מופיע מיד</small></div><span class="lp-num">72</span><span class="lp-btn">כפתור</span></div>
+    ${sec("1. צבע", "הצבע הראשי של האתר", `<div class="sw-row">${PALETTES.map(([id, nm, c]) => `<button type="button" class="sw${id === cur ? " on" : ""}" data-act="setPalette" data-v="${id}" aria-label="${nm}"><i style="background:${c}"></i>${nm}</button>`).join("")}</div>`)}
+    ${sec("2. רקע", "כהה, בהיר, או אוטומטי לפי הטלפון", `<div class="mode-row">${opt("setMode", "dark", tm === "dark", "🌙 כהה")}${opt("setMode", "light", tm === "light", "☀️ בהיר")}${opt("setMode", "auto", tm === "auto", "🔄 אוטומטי")}</div>`)}
+    ${sec("3. תצוגה", "איך האתר מסודר על המסך", `<div class="mode-row">${opt("setDevice", "phone", dv === "phone", "📱 טלפון")}${opt("setDevice", "pc", dv === "pc", "💻 מחשב")}${opt("setDevice", "auto", dv === "auto", "🔄 אוטומטי")}</div><p class="look-note">אוטומטי = לפי גודל המסך. טלפון = תפריט למטה ועמוד צר. מחשב = תפריט למעלה ועמוד רחב.</p>`)}
+    ${sec("4. עיצוב", "סגנון וקישוט, עובד עם כל צבע", `<div class="st-row">${STYLES.map(stBtn).join("")}</div>`)}
+    ${sec("5. תוצאה בדף משחק", "", `<div class="st-row">${SCORE_STYLES.map(([id, nm]) => `<button type="button" class="st${id === scoreStyle() ? " on" : ""}" data-act="setScore" data-v="${id}">${nm}</button>`).join("")}</div>`)}
+    ${sec("6. אנימציה בפתיחה", "", `<div class="st-row">${INTROS.map(([id, nm]) => `<button type="button" class="st${id === (LS.get("league_intro") || "none") ? " on" : ""}" data-act="setIntro" data-v="${id}">${nm}</button>`).join("")}</div>`)}
+    <p class="small muted" style="margin:12px 0 0">נשמר רק אצלך.</p>
+    <div class="row-actions" style="margin-top:10px"><button class="btn" data-act="lookReset">↺ חזרה לרגיל</button><button class="btn pri" data-close style="flex:1">סגור</button></div>`);
 }
 $("#themeBtn").addEventListener("click", lookModal);
 $("#themeBtn").title = "מראה האתר"; $("#themeBtn").setAttribute("aria-label", "מראה האתר");
 function refreshPalButtons() { const r = document.documentElement.dataset, t = r.theme;
   document.querySelectorAll("[data-act=setPalette]").forEach(b => b.classList.toggle("on", b.dataset.v === r.palette));
   document.querySelectorAll("[data-act=setStyle]").forEach(b => b.classList.toggle("on", b.dataset.v === r.style));
-  document.querySelectorAll("[data-act=setMode]").forEach(b => b.classList.toggle("on", b.dataset.v === t)); }
+  const tm = LS.get("league_theme") === "light" || LS.get("league_theme") === "dark" ? LS.get("league_theme") : "auto";
+  document.querySelectorAll("[data-act=setMode]").forEach(b => b.classList.toggle("on", b.dataset.v === tm));
+  document.querySelectorAll("[data-act=setDevice]").forEach(b => b.classList.toggle("on", b.dataset.v === (LS.get("league_device") || "auto"))); }
 
+
+/* ===== עדכון אוטומטי: כל דקה בודקים אם יש נתונים חדשים; בזמן משחק – כל 30 שניות, כולל תוצאה חיה מאתר האיגוד ===== */
+function liveWindow() {
+  const now = Date.now();
+  return DB.games.some(g => { if (g.status === "live") return true; if (isFinal(g) && isN(g.homeScore)) return false;
+    const t = gameStart(g); return t && t - 15 * 60e3 <= now && now - t < 3.5 * 3600e3; });
+}
+let liveTicks = 0;
+async function liveTick() {
+  if (MODE !== "server" || document.visibilityState !== "visible" || dirty || saving || (isAdminL() && DRAFT && DB === DRAFT)) return;
+  const inGame = liveWindow(); liveTicks++;
+  if (!inGame && liveTicks % 2) return; // בלי משחק: פעם בדקה
+  try {
+    let rev = null;
+    if (inGame) { const r = await fetch("/api/ibba", { cache:"no-store" }); if (r.ok) { const j = await r.json(); if (j.ok) rev = j.rev; } }
+    if (rev === null || Number(rev) !== Number(REV)) {
+      const r = await fetch("/api/data?have=" + REV, { cache:"no-store" }); const doc = await r.json();
+      if (!doc.same && doc.rev !== REV && !dirty && !saving) { const before = JSON.stringify(DB.games.map(g => [g.id, g.homeScore, g.awayScore, g.status]));
+        setData(doc.data); REV = doc.rev; writeCache(); render(true);
+        if (before !== JSON.stringify(DB.games.map(g => [g.id, g.homeScore, g.awayScore, g.status]))) pill("ok", inGame ? "🔴 התוצאה עודכנה" : "עודכן ✓"); }
+    }
+  } catch {}
+}
+setInterval(liveTick, 30e3);
 /* רענון כשחוזרים לטאב */
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState !== "visible" || MODE !== "server" || dirty || saving) return;
@@ -4470,6 +4634,7 @@ function demoData() {
 }
 
 /* ---- כפתור "למעלה" ---- */
+(() => { const f = document.createElement("button"); f.className = "srch-fab"; f.dataset.act = "search"; f.setAttribute("aria-label", "חיפוש מהיר"); f.innerHTML = "🔍"; document.body.appendChild(f); })();
 (() => { const b = document.createElement("button"); b.className = "top-fab"; b.setAttribute("aria-label", "חזרה למעלה"); b.innerHTML = "↑";
   b.addEventListener("click", () => window.scrollTo({ top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
   document.body.appendChild(b); const upd = () => b.classList.toggle("show", window.scrollY > 700); addEventListener("scroll", upd, { passive:true }); upd(); })();

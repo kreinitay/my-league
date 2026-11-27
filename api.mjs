@@ -115,6 +115,10 @@ export function makeHandler(openStore, getRealPassword = readPassword, openChat 
       await store.setJSON("staff", st);
       return json({ ok: true, ...st });
     }
+    // תוצאה חיה מאתר האיגוד (ibasketball.co.il) – רק התוצאה והרבע, לכל המשחקים של היום
+    if (path.endsWith("/api/ibba") && req.method === "GET") {
+      try { return json(await ibbaSync(store)); } catch (e) { return json({ ok: false, error: String(e?.message || e) }, 502); }
+    }
     if (path.endsWith("/sw.js")) return new Response(SW_JS, { headers: { "content-type": "text/javascript; charset=utf-8", "cache-control": "no-cache" } });
     if (path.includes("/api/push")) return pushRoute(req, url, path, openPush ? openPush() : store, lvl, openChat ? openChat() : store);
     if (path.includes("/api/chat")) return chatRoute(req, url, path, openChat ? openChat() : store, lvl, store, openPush ? openPush() : store);
@@ -130,7 +134,7 @@ export default makeHandler(
   () => getStore({ name: "league-push", consistency: "strong" }),
 );
 
-export const config = { path: ["/api/data", "/api/login", "/api/chat", "/api/chat/*", "/api/push", "/api/push/*", "/api/staff", "/sw.js"] };
+export const config = { path: ["/api/data", "/api/login", "/api/chat", "/api/chat/*", "/api/push", "/api/push/*", "/api/staff", "/api/ibba", "/sw.js"] };
 
 /* ================= צ'אט =================
    כל מי שנכנס בוחר מי הוא (שחקן/מאמן/הורה...), מקבל "כרטיס כניסה" (token) שנשמר בדפדפן, ומופיע אצל המנהל ברשימת "אנשים".
@@ -611,3 +615,84 @@ export async function runReminders(dataStore, pushStore, origin, now = new Date(
 
 /* קוד ההתראות שרץ ברקע בטלפון (service worker) – מוגש מכאן כדי שלא יהיה עוד קובץ .js בתיקייה */
 const SW_JS = "/* התראות לטלפון – מציג את ההתראה ופותח את העמוד הנכון כשלוחצים עליה */\nself.addEventListener(\"install\", () => self.skipWaiting());\nself.addEventListener(\"activate\", (e) => e.waitUntil(self.clients.claim()));\nself.addEventListener(\"push\", (e) => {\n  let d = {}; try { d = e.data ? e.data.json() : {}; } catch { d = { title: e.data && e.data.text() }; }\n  e.waitUntil(self.registration.showNotification(d.title || \"הליגה\", { body: d.body || \"\", icon: \"icon.svg\", badge: \"icon.svg\", tag: d.tag || undefined, data: { url: d.url || \"#/\" }, dir: \"rtl\", lang: \"he\" }));\n});\nself.addEventListener(\"notificationclick\", (e) => {\n  e.notification.close();\n  const target = new URL(\"./\" + (e.notification.data && e.notification.data.url || \"#/\"), self.registration.scope).href;\n  e.waitUntil((async () => {\n    const all = await self.clients.matchAll({ type: \"window\", includeUncontrolled: true });\n    for (const c of all) { if (\"focus\" in c) { await c.focus(); if (\"navigate\" in c) { try { await c.navigate(target); } catch {} } return; } }\n    if (self.clients.openWindow) await self.clients.openWindow(target);\n  })());\n});\n";
+
+/* ================= תוצאה חיה מאתר האיגוד =================
+   קורא מה-API הציבורי של ibasketball.co.il רק תוצאה, רבע ומצב משחק.
+   לא נוגע בטבלת השחקנים. משחק שכבר "סופי" אצלנו עם תוצאה – לא משתנה. */
+const IBBA_DEF = { league: 119989, season: 119888 };
+const IBBA_TTL = 25e3;
+const ibNorm = (s) => String(s || "").replace(/["'׳״`]/g, "").replace(/מחוזית|ילדים א|שומרון/g, " ")
+  .replace(/(^|\s)(מכבי|הפועל|בני|עירוני|אליצור|בית"?ר)(?=\s)/g, " ").replace(/\s+/g, " ").trim();
+function ibSim(a, b) {
+  a = ibNorm(a); b = ibNorm(b); if (!a || !b) return 0; if (a === b) return 1;
+  const bg = (s) => { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const k = s.slice(i, i + 2); m.set(k, (m.get(k) || 0) + 1); } return m; };
+  const A = bg(a), B = bg(b); let inter = 0; for (const [k, v] of A) inter += Math.min(v, B.get(k) || 0);
+  return (2 * inter) / (a.length - 1 + b.length - 1);
+}
+export function ibbaMatch(data, ev) {
+  const byId = data.games.find((g) => g.ibbaId === ev.id); if (byId) return byId;
+  const tn = (id) => data.teams.find((t) => t.id === id)?.name || "";
+  let best = null, bs = 0;
+  for (const g of data.games) {
+    const h = ibSim(tn(g.homeId), ev.home?.team), a = ibSim(tn(g.awayId), ev.away?.team);
+    if (h < 0.55 || a < 0.55) continue;
+    const sc = h + a + (String(g.date || "") === String(ev.date || "").slice(0, 10) ? 0.5 : 0);
+    if (sc > bs) { bs = sc; best = g; }
+  }
+  return bs >= 1.4 ? best : null;
+}
+const ibNum = (v) => (v === "" || v == null || isNaN(Number(v)) ? null : Number(v));
+export function ibbaApply(data, events) {
+  const changed = [];
+  for (const ev of events) {
+    const hs = ibNum(ev.home?.points), as = ibNum(ev.away?.points), st = String(ev.state || "").toLowerCase();
+    const finished = st === "finished" || st === "final" || st === "ended";
+    if (hs === null || as === null) continue;
+    if (!finished && hs === 0 && as === 0 && !ev.quarter_current) continue; // עוד לא התחיל
+    const g = ibbaMatch(data, ev); if (!g) continue;
+    if (!g.ibbaId) g.ibbaId = ev.id;
+    if (g.status === "final" && g.homeScore != null && g.awayScore != null) continue; // כבר הוזן – לא נוגעים
+    const q = parseInt(ev.quarter_current, 10);
+    const next = finished ? { status: "final", homeScore: hs, awayScore: as } : { status: "live", homeScore: hs, awayScore: as, liveQ: q >= 1 && q <= 4 ? q : (g.liveQ || 0), liveClock: String(ev.quarter_current_time || "").slice(0, 8) };
+    if (Object.entries(next).some(([k, v]) => g[k] !== v)) {
+      Object.assign(g, next); if (finished) { delete g.liveQ; delete g.liveClock; } g.ibbaAt = new Date().toISOString();
+      changed.push({ id: g.id, ...next });
+    }
+  }
+  return changed;
+}
+export async function ibbaFetch(cfg, fetchFn = fetch) {
+  const f = "id,date,state,quarter_current,quarter_current_time,home,away,teams";
+  const u = `https://ibasketball.co.il/wp-json/sportspress/v2/events?leagues=${cfg.league}&seasons=${cfg.season}&per_page=40&_fields=${f}`;
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetchFn(u, { signal: ctl.signal, headers: { accept: "application/json", "user-agent": "Mozilla/5.0 (league-stats fan site; score only)" } });
+    if (!r.ok) throw new Error("ibba-http-" + r.status);
+    const j = await r.json(); if (!Array.isArray(j)) throw new Error("ibba-bad-json"); return j;
+  } finally { clearTimeout(t); }
+}
+export async function ibbaSync(store, { now = Date.now(), fetchFn = fetch, force = false } = {}) {
+  const cache = (await store.get("ibba", { type: "json" })) || {};
+  const doc = await store.get(KEY, { type: "json" });
+  if (!doc?.data) return { ok: false, error: "no-data" };
+  if (!force && cache.at && now - cache.at < IBBA_TTL) return { ok: true, cached: true, rev: doc.rev, live: cache.live || [] };
+  const L = doc.data.league || {};
+  if (L.ibbaOff) return { ok: true, off: true, rev: doc.rev, live: [] };
+  const cfg = { league: Number(L.ibbaLeague) || IBBA_DEF.league, season: Number(L.ibbaSeason) || IBBA_DEF.season };
+  // רק כשיש משחק שמתחיל/משוחק עכשיו או שעוד חסרה לו תוצאה (עד 3 ימים אחורה)
+  const due = doc.data.games.some((g) => { if (g.status === "final" && g.homeScore != null) return false;
+    const t = gameStartUtc(g.date, g.time || "18:00"); return t && t - 15 * 60e3 <= now && now - t < 3 * 864e5; });
+  if (!force && !due) { await store.setJSON("ibba", { at: now, live: [], idle: true }); return { ok: true, idle: true, rev: doc.rev, live: [] }; }
+  await store.setJSON("ibba", { ...cache, at: now }); // מונע הרבה בקשות בבת אחת
+  const events = await ibbaFetch(cfg, fetchFn);
+  const changed = ibbaApply(doc.data, events);
+  let rev = doc.rev;
+  if (changed.length) {
+    const cur = await store.get(KEY, { type: "json" });
+    if (Number(cur?.rev) === Number(doc.rev)) { rev = Number(doc.rev) + 1; await store.setJSON(KEY, { data: doc.data, rev, savedAt: new Date().toISOString(), by: "ibba" }); }
+    else rev = cur.rev; // מישהו שמר באמצע – ננסה בפעם הבאה
+  }
+  const live = doc.data.games.filter((g) => g.status === "live").map((g) => ({ id: g.id, h: g.homeScore, a: g.awayScore, q: g.liveQ || 0, c: g.liveClock || "" }));
+  await store.setJSON("ibba", { at: now, live, changed: changed.length });
+  return { ok: true, rev, changed, live };
+}
