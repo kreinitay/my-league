@@ -1,0 +1,10 @@
+// הגדרות לאתר הליגה ב-Cloudflare Workers: מריץ את השרת (_worker.js) ומחבר את מסד הנתונים league.
+{
+  "name": "my-league",
+  "main": "_worker.js",
+  "compatibility_date": "2025-09-01",
+  "assets": { "directory": ".", "binding": "ASSETS" },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "league", "database_id": "5d1d7ef0-b88d-4e7a-8db6-8c68677b9df2" }
+  ]
+}
